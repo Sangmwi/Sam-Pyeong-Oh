@@ -4,8 +4,8 @@
  * Fetch wrapper that automatically attaches JWT token from Zustand store
  */
 
-import { useAuthStore } from '@/store/auth';
-import type { APIResponse } from '@sam-pyeong-oh/shared';
+import type { APIResponse } from "@sam-pyeong-oh/shared";
+import { useAuthStore } from "@/store/auth";
 
 interface FetchOptions extends RequestInit {
   skipAuth?: boolean;
@@ -14,7 +14,7 @@ interface FetchOptions extends RequestInit {
 class APIClient {
   private baseURL: string;
 
-  constructor(baseURL: string = '/api') {
+  constructor(baseURL: string = "/api") {
     this.baseURL = baseURL;
   }
 
@@ -32,7 +32,7 @@ class APIClient {
     const response = await fetch(`${this.baseURL}${endpoint}`, {
       ...restOptions,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...(authHeader && { Authorization: authHeader }),
         ...headers,
       },
@@ -40,9 +40,9 @@ class APIClient {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({
-        error: { message: 'Unknown error' },
+        error: { message: "Unknown error" },
       }));
-      throw new Error(error.error?.message || 'API request failed');
+      throw new Error(error.error?.message || "API request failed");
     }
 
     const data: APIResponse<T> = await response.json();
@@ -55,35 +55,27 @@ class APIClient {
   }
 
   async get<T = unknown>(endpoint: string, options?: FetchOptions): Promise<T> {
-    return this.request<T>(endpoint, { ...options, method: 'GET' });
+    return this.request<T>(endpoint, { ...options, method: "GET" });
   }
 
-  async post<T = unknown>(
-    endpoint: string,
-    body?: unknown,
-    options?: FetchOptions
-  ): Promise<T> {
+  async post<T = unknown>(endpoint: string, body?: unknown, options?: FetchOptions): Promise<T> {
     return this.request<T>(endpoint, {
       ...options,
-      method: 'POST',
+      method: "POST",
       body: body ? JSON.stringify(body) : undefined,
     });
   }
 
-  async patch<T = unknown>(
-    endpoint: string,
-    body?: unknown,
-    options?: FetchOptions
-  ): Promise<T> {
+  async patch<T = unknown>(endpoint: string, body?: unknown, options?: FetchOptions): Promise<T> {
     return this.request<T>(endpoint, {
       ...options,
-      method: 'PATCH',
+      method: "PATCH",
       body: body ? JSON.stringify(body) : undefined,
     });
   }
 
   async delete<T = unknown>(endpoint: string, options?: FetchOptions): Promise<T> {
-    return this.request<T>(endpoint, { ...options, method: 'DELETE' });
+    return this.request<T>(endpoint, { ...options, method: "DELETE" });
   }
 }
 

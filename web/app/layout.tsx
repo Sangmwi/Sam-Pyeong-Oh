@@ -1,17 +1,18 @@
-import type { Metadata } from 'next';
-import './globals.css';
-import { Providers } from './providers';
+import type { Metadata, Viewport } from "next";
+import "./globals.css";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: 'Sam-Pyeong-Oh (삼평오)',
-  description: 'AI-powered chat application',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
-  themeColor: '#ffffff',
+  title: "Sam-Pyeong-Oh (삼평오)",
+  description: "AI-powered chat application",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({

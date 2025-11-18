@@ -1,10 +1,14 @@
 {
   "semi": true,
   "trailingComma": "es5",
-  "singleQuote": true,
+  "singleQuote": false,
   "printWidth": 100,
   "tabWidth": 2,
   "useTabs": false,
   "arrowParens": "always",
-  "endOfLine": "lf"
+  "endOfLine": "lf",
+  "plugins": ["@ianvs/prettier-plugin-sort-imports", "prettier-plugin-tailwindcss"],
+  "importOrder": ["^react", "^next", "<THIRD_PARTY_MODULES>", "^@sam-pyeong-oh/", "^@/", "^[./]"],
+  "importOrderTypeScriptVersion": "5.0.0",
+  "tailwindFunctions": ["clsx", "cn", "cva"]
 }

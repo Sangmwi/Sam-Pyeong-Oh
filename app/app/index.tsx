@@ -1,15 +1,15 @@
-import React, { useCallback, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { WebView } from 'react-native-webview';
-import * as WebBrowser from 'expo-web-browser';
-import * as SecureStore from 'expo-secure-store';
+import React, { useCallback, useRef, useState } from "react";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { WebView } from "react-native-webview";
+import * as SecureStore from "expo-secure-store";
+import * as WebBrowser from "expo-web-browser";
 import {
   createAuthTokenMessage,
   WebToNativeMessageType,
   type WebToNativeMessage,
-} from '@sam-pyeong-oh/shared';
+} from "@sam-pyeong-oh/shared";
 
-const WEB_URL = process.env.EXPO_PUBLIC_WEB_URL || 'http://localhost:3000';
+const WEB_URL = process.env.EXPO_PUBLIC_WEB_URL || "http://localhost:3000";
 
 export default function App() {
   const webViewRef = useRef<WebView>(null);
@@ -24,21 +24,21 @@ export default function App() {
   const handleGoogleLogin = useCallback(async () => {
     try {
       // TODO: Implement actual Google OAuth
-      const mockToken = 'mock-jwt-token-' + Date.now();
-      const mockUserId = 'user_123';
+      const mockToken = "mock-jwt-token-" + Date.now();
+      const mockUserId = "user_123";
       const mockExpiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
 
-      await SecureStore.setItemAsync('auth_token', mockToken);
-      await SecureStore.setItemAsync('user_id', mockUserId);
+      await SecureStore.setItemAsync("auth_token", mockToken);
+      await SecureStore.setItemAsync("user_id", mockUserId);
 
-      const message = createAuthTokenMessage(mockToken, mockUserId, mockExpiresAt, 'google');
+      const message = createAuthTokenMessage(mockToken, mockUserId, mockExpiresAt, "google");
       webViewRef.current?.postMessage(JSON.stringify(message));
       setIsAuthenticated(true);
 
-      Alert.alert('Success', 'Logged in with Google!');
+      Alert.alert("Success", "Logged in with Google!");
     } catch (error) {
-      console.error('Google login error:', error);
-      Alert.alert('Error', 'Failed to login with Google');
+      console.error("Google login error:", error);
+      Alert.alert("Error", "Failed to login with Google");
     }
   }, []);
 
@@ -46,21 +46,21 @@ export default function App() {
   const handleKakaoLogin = useCallback(async () => {
     try {
       // TODO: Implement actual Kakao OAuth
-      const mockToken = 'mock-jwt-token-kakao-' + Date.now();
-      const mockUserId = 'user_kakao_123';
+      const mockToken = "mock-jwt-token-kakao-" + Date.now();
+      const mockUserId = "user_kakao_123";
       const mockExpiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
 
-      await SecureStore.setItemAsync('auth_token', mockToken);
-      await SecureStore.setItemAsync('user_id', mockUserId);
+      await SecureStore.setItemAsync("auth_token", mockToken);
+      await SecureStore.setItemAsync("user_id", mockUserId);
 
-      const message = createAuthTokenMessage(mockToken, mockUserId, mockExpiresAt, 'kakao');
+      const message = createAuthTokenMessage(mockToken, mockUserId, mockExpiresAt, "kakao");
       webViewRef.current?.postMessage(JSON.stringify(message));
       setIsAuthenticated(true);
 
-      Alert.alert('Success', 'Logged in with Kakao!');
+      Alert.alert("Success", "Logged in with Kakao!");
     } catch (error) {
-      console.error('Kakao login error:', error);
-      Alert.alert('Error', 'Failed to login with Kakao');
+      console.error("Kakao login error:", error);
+      Alert.alert("Error", "Failed to login with Kakao");
     }
   }, []);
 
@@ -72,19 +72,19 @@ export default function App() {
 
         if (message.type === WebToNativeMessageType.REQUEST_LOGIN) {
           const { provider } = message.payload;
-          if (provider === 'google') {
+          if (provider === "google") {
             handleGoogleLogin();
-          } else if (provider === 'kakao') {
+          } else if (provider === "kakao") {
             handleKakaoLogin();
           }
         } else if (message.type === WebToNativeMessageType.REQUEST_LOGOUT) {
-          SecureStore.deleteItemAsync('auth_token');
-          SecureStore.deleteItemAsync('user_id');
+          SecureStore.deleteItemAsync("auth_token");
+          SecureStore.deleteItemAsync("user_id");
           setIsAuthenticated(false);
-          Alert.alert('Success', 'Logged out successfully');
+          Alert.alert("Success", "Logged out successfully");
         }
       } catch (error) {
-        console.error('Failed to parse WebView message:', error);
+        console.error("Failed to parse WebView message:", error);
       }
     },
     [handleGoogleLogin, handleKakaoLogin]
@@ -126,43 +126,43 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
     padding: 20,
   },
   title: {
     fontSize: 48,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 8,
-    color: '#333',
+    color: "#333",
   },
   subtitle: {
     fontSize: 20,
-    color: '#666',
+    color: "#666",
     marginBottom: 40,
   },
   googleButton: {
-    backgroundColor: '#4285F4',
+    backgroundColor: "#4285F4",
     paddingVertical: 16,
     paddingHorizontal: 32,
     borderRadius: 8,
     marginBottom: 16,
-    width: '80%',
-    alignItems: 'center',
+    width: "80%",
+    alignItems: "center",
   },
   kakaoButton: {
-    backgroundColor: '#FEE500',
+    backgroundColor: "#FEE500",
     paddingVertical: 16,
     paddingHorizontal: 32,
     borderRadius: 8,
-    width: '80%',
-    alignItems: 'center',
+    width: "80%",
+    alignItems: "center",
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   webViewContainer: {
     flex: 1,

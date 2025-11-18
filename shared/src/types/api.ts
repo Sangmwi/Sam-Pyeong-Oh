@@ -12,7 +12,7 @@ export interface UserDTO {
   id: string;
   email: string;
   name: string | null;
-  provider: 'google' | 'kakao';
+  provider: "google" | "kakao";
   createdAt: string;
   updatedAt: string;
 }
@@ -20,7 +20,7 @@ export interface UserDTO {
 export interface CreateUserDTO {
   email: string;
   name?: string;
-  provider: 'google' | 'kakao';
+  provider: "google" | "kakao";
   providerId: string;
 }
 
@@ -53,7 +53,7 @@ export interface ThreadWithMessagesDTO extends ThreadDTO {
 // Message Types
 // ============================================================================
 
-export type MessageRole = 'user' | 'assistant' | 'system';
+export type MessageRole = "user" | "assistant" | "system";
 
 export interface MessageDTO {
   id: number;
@@ -144,7 +144,7 @@ export interface PaginationParams {
   page?: number;
   limit?: number;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 export interface PaginatedResponse<T> {

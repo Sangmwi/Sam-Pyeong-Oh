@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
-import { messageBridge } from '@/lib/message-bridge';
+import { useEffect, useState } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { messageBridge } from "@/lib/message-bridge";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(

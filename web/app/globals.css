@@ -1,10 +1,13 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
-:root {
+@theme {
+  /* Custom Colors - Tailwind v4 방식 */
   --color-primary: oklch(0.71 0.15 35);
   --color-secondary: oklch(0.65 0.12 210);
   --color-accent: oklch(0.75 0.18 140);
+}
 
+:root {
   --color-background: oklch(0.98 0.01 106);
   --color-foreground: oklch(0.15 0.02 286);
 
@@ -25,14 +28,16 @@
     --color-background: oklch(0.15 0.02 286);
     --color-foreground: oklch(0.98 0.01 106);
     --color-border: oklch(0.25 0.02 286);
-    --color-input: oklch(0.20 0.02 286);
+    --color-input: oklch(0.2 0.02 286);
   }
 }
 
-* {
+/* Tailwind CSS v4의 Preflight가 자동으로 margin/padding을 리셋하므로 제거 */
+/* box-sizing만 유지 (일부 브라우저 호환성) */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
-  padding: 0;
-  margin: 0;
 }
 
 html,

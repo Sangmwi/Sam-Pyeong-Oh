@@ -4,15 +4,15 @@
  * 특정 메시지 타입에 대한 핸들러를 쉽게 등록
  */
 
-import { useEffect } from 'react';
-import { messageBridge } from '@/lib/message-bridge';
-import type { NativeToWebMessage } from '@sam-pyeong-oh/shared';
+import { useEffect } from "react";
+import type { NativeToWebMessage } from "@sam-pyeong-oh/shared";
+import { messageBridge } from "@/lib/message-bridge";
 
 /**
  * 특정 메시지 타입에 핸들러 등록
  */
 export function useMessageHandler<T extends NativeToWebMessage>(
-  type: T['type'],
+  type: T["type"],
   handler: (message: T) => void | Promise<void>,
   deps: React.DependencyList = []
 ) {

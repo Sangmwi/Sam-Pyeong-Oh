@@ -18,11 +18,11 @@ export function getTokenExpiryTime(expiresInSeconds: number): number {
 
 export function parseJWTPayload<T = Record<string, unknown>>(token: string): T | null {
   try {
-    const parts = token.split('.');
+    const parts = token.split(".");
     if (parts.length !== 3) return null;
 
     const payload = parts[1];
-    const decoded = Buffer.from(payload, 'base64').toString('utf-8');
+    const decoded = Buffer.from(payload, "base64").toString("utf-8");
     return JSON.parse(decoded) as T;
   } catch {
     return null;

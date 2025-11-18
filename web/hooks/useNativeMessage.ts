@@ -4,9 +4,9 @@
  * 확장 가능한 메시지 핸들러 시스템 사용
  */
 
-import { NativeToWebMessageType } from '@sam-pyeong-oh/shared';
-import { useAuthStore } from '@/store/auth';
-import { useMessageHandler } from './useMessageHandler';
+import { NativeToWebMessageType } from "@sam-pyeong-oh/shared";
+import { useAuthStore } from "@/store/auth";
+import { useMessageHandler } from "./useMessageHandler";
 
 export function useNativeMessage() {
   const { setAuth, clearAuth } = useAuthStore();
@@ -34,7 +34,7 @@ export function useNativeMessage() {
   useMessageHandler(
     NativeToWebMessageType.AUTH_ERROR,
     (message) => {
-      console.error('Auth error from native:', message.payload.error);
+      console.error("Auth error from native:", message.payload.error);
       // TODO: 사용자에게 에러 표시
     },
     []

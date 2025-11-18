@@ -15,16 +15,17 @@ Expo WebView 안에서 Next.js가 실행되므로, 네이티브 기능(OAuth, Se
 useEffect(() => {
   const handler = (event: MessageEvent) => {
     const message = JSON.parse(event.data);
-    if (message.type === 'AUTH_TOKEN') {
+    if (message.type === "AUTH_TOKEN") {
       setAuth(message.payload);
     }
   };
-  window.addEventListener('message', handler);
-  return () => window.removeEventListener('message', handler);
+  window.addEventListener("message", handler);
+  return () => window.removeEventListener("message", handler);
 }, []);
 ```
 
 **문제점:**
+
 - 메시지 타입이 늘어날 때마다 모든 컴포넌트를 수정해야 함
 - 타입 안정성이 보장되지 않음
 - 메모리 누수 위험 (cleanup 누락 시)
@@ -56,6 +57,7 @@ export const messageBridge = new MessageBridge();
 ```
 
 **핵심 아이디어:**
+
 - **전역에서 단 한 번만** `window.addEventListener('message')` 실행
 - 메시지 타입별로 핸들러를 **등록/해제** 가능
 - 타입 안정성 보장
@@ -68,7 +70,7 @@ export const messageBridge = new MessageBridge();
 
 ```typescript
 export function useMessageHandler<T extends NativeToWebMessage>(
-  type: T['type'],              // 어떤 메시지 타입?
+  type: T["type"], // 어떤 메시지 타입?
   handler: (message: T) => void, // 처리 함수
   deps: React.DependencyList = [] // 의존성 배열
 ) {
@@ -135,7 +137,7 @@ export function useAuthMessage() {
   useMessageHandler(
     NativeToWebMessageType.AUTH_ERROR,
     (message) => {
-      console.error('Auth error from native:', message.payload.error);
+      console.error("Auth error from native:", message.payload.error);
       // TODO: 사용자에게 에러 표시
     },
     []
@@ -209,10 +211,10 @@ export default function RootLayout({ children }) {
 ```typescript
 // 1. 메시지 타입 enum에 추가
 export enum NativeToWebMessageType {
-  AUTH_TOKEN = 'AUTH_TOKEN',
-  LOGOUT_SUCCESS = 'LOGOUT_SUCCESS',
-  AUTH_ERROR = 'AUTH_ERROR',
-  PROFILE_UPDATED = 'PROFILE_UPDATED', // 👈 새로 추가
+  AUTH_TOKEN = "AUTH_TOKEN",
+  LOGOUT_SUCCESS = "LOGOUT_SUCCESS",
+  AUTH_ERROR = "AUTH_ERROR",
+  PROFILE_UPDATED = "PROFILE_UPDATED", // 👈 새로 추가
 }
 
 // 2. 메시지 인터페이스 정의
@@ -260,9 +262,9 @@ export function useAuthMessage() {
 
 ```typescript
 // web/hooks/useProfileMessage.ts
-import { useMessageHandler } from './useMessageHandler';
-import { NativeToWebMessageType } from '@sam-pyeong-oh/shared';
-import { useProfileStore } from '@/store/profile';
+import { NativeToWebMessageType } from "@sam-pyeong-oh/shared";
+import { useProfileStore } from "@/store/profile";
+import { useMessageHandler } from "./useMessageHandler";
 
 export function useProfileMessage() {
   const { updateProfile } = useProfileStore();
@@ -295,10 +297,10 @@ export default function ProfilePage() {
 ### 1. 도메인별로 훅 분리
 
 ```typescript
-useAuthMessage()      // 인증 관련
-useProfileMessage()   // 프로필 관련
-usePaymentMessage()   // 결제 관련
-useChatMessage()      // 채팅 관련
+useAuthMessage(); // 인증 관련
+useProfileMessage(); // 프로필 관련
+usePaymentMessage(); // 결제 관련
+useChatMessage(); // 채팅 관련
 ```
 
 ### 2. 글로벌 메시지 처리
@@ -307,11 +309,11 @@ useChatMessage()      // 채팅 관련
 
 ```typescript
 // web/hooks/useGlobalMessageHandler.ts
-import { useGlobalMessageHandler } from './useMessageHandler';
+import { useGlobalMessageHandler } from "./useMessageHandler";
 
 export function useMessageLogger() {
   useGlobalMessageHandler((message) => {
-    console.log('[Native→Web]', message.type, message.payload);
+    console.log("[Native→Web]", message.type, message.payload);
     // 분석 도구로 전송 등
   }, []);
 }
@@ -350,9 +352,9 @@ useMessageHandler(
       await validateToken(message.payload.token);
       setAuth(message.payload);
     } catch (error) {
-      console.error('Token validation failed:', error);
+      console.error("Token validation failed:", error);
       // 사용자에게 에러 표시
-      toast.error('로그인에 실패했습니다.');
+      toast.error("로그인에 실패했습니다.");
     }
   },
   [setAuth]
@@ -369,15 +371,18 @@ useMessageHandler(
 
 ```javascript
 // 네이티브에서 웹으로 메시지 보내는 시뮬레이션
-window.postMessage(JSON.stringify({
-  type: 'AUTH_TOKEN',
-  payload: {
-    token: 'test-token-123',
-    userId: 'user-456',
-    expiresAt: Date.now() + 3600000,
-    provider: 'google'
-  }
-}), '*');
+window.postMessage(
+  JSON.stringify({
+    type: "AUTH_TOKEN",
+    payload: {
+      token: "test-token-123",
+      userId: "user-456",
+      expiresAt: Date.now() + 3600000,
+      provider: "google",
+    },
+  }),
+  "*"
+);
 ```
 
 ### 메시지 로깅
@@ -388,9 +393,9 @@ useEffect(() => {
   messageBridge.initialize();
 
   // 개발 환경에서만 로깅
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     messageBridge.onAll((message) => {
-      console.log('[MessageBridge]', message);
+      console.log("[MessageBridge]", message);
     });
   }
 }, []);
@@ -401,22 +406,26 @@ useEffect(() => {
 ## 📊 구조 비교
 
 ### 기존 방식
+
 ```
 컴포넌트A → addEventListener → 메시지 파싱 → 처리
 컴포넌트B → addEventListener → 메시지 파싱 → 처리
 컴포넌트C → addEventListener → 메시지 파싱 → 처리
 ```
+
 - 이벤트 리스너 3개
 - 코드 중복 심함
 - 타입 안정성 없음
 
 ### 새로운 방식
+
 ```
 MessageBridge → addEventListener (1개만!)
   ├─ AUTH_TOKEN → useAuthMessage
   ├─ LOGOUT_SUCCESS → useAuthMessage
   └─ PROFILE_UPDATED → useProfileMessage
 ```
+
 - 이벤트 리스너 1개
 - 핸들러만 추가하면 됨
 - 완전한 타입 안정성

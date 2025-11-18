@@ -4,8 +4,7 @@
  * 확장 가능한 메시지 핸들러 시스템
  */
 
-import type { NativeToWebMessage } from '@sam-pyeong-oh/shared';
-import { NativeToWebMessageType } from '@sam-pyeong-oh/shared';
+import { NativeToWebMessageType, type NativeToWebMessage } from "@sam-pyeong-oh/shared";
 
 // 핸들러 타입 정의
 type MessageHandler<T extends NativeToWebMessage = NativeToWebMessage> = (
@@ -22,10 +21,7 @@ class MessageBridge {
   /**
    * 특정 메시지 타입에 핸들러 등록
    */
-  on<T extends NativeToWebMessage>(
-    type: T['type'],
-    handler: MessageHandler<T>
-  ): () => void {
+  on<T extends NativeToWebMessage>(type: T["type"], handler: MessageHandler<T>): () => void {
     if (!this.handlers.has(type)) {
       this.handlers.set(type, new Set());
     }
@@ -76,7 +72,7 @@ class MessageBridge {
       try {
         handler(message);
       } catch (error) {
-        console.error('Error in global message handler:', error);
+        console.error("Error in global message handler:", error);
       }
     });
   }
@@ -93,11 +89,11 @@ class MessageBridge {
         this.handleMessage(message);
       } catch (error) {
         // 다른 출처의 메시지는 무시
-        console.debug('Ignored non-bridge message:', error);
+        console.debug("Ignored non-bridge message:", error);
       }
     };
 
-    window.addEventListener('message', this.messageListener);
+    window.addEventListener("message", this.messageListener);
     this.isInitialized = true;
   }
 
@@ -106,7 +102,7 @@ class MessageBridge {
    */
   destroy(): void {
     if (this.messageListener) {
-      window.removeEventListener('message', this.messageListener);
+      window.removeEventListener("message", this.messageListener);
       this.messageListener = null;
     }
     this.handlers.clear();

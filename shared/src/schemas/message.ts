@@ -4,13 +4,13 @@
  * Runtime validation for API requests and data integrity
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // Message Schemas
 // ============================================================================
 
-export const messageRoleSchema = z.enum(['user', 'assistant', 'system']);
+export const messageRoleSchema = z.enum(["user", "assistant", "system"]);
 
 export const createMessageSchema = z.object({
   threadId: z.number().int().positive(),
@@ -42,7 +42,7 @@ export const threadIdSchema = z.number().int().positive();
 // User Schemas
 // ============================================================================
 
-export const providerSchema = z.enum(['google', 'kakao']);
+export const providerSchema = z.enum(["google", "kakao"]);
 
 export const createUserSchema = z.object({
   email: z.string().email(),
@@ -87,7 +87,7 @@ export const paginationSchema = z.object({
   page: z.number().int().min(1).optional().default(1),
   limit: z.number().int().min(1).max(100).optional().default(20),
   sortBy: z.string().optional(),
-  sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
+  sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
 });
 
 // ============================================================================

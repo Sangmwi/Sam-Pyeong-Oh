@@ -4,13 +4,13 @@
  * Memory-only storage for JWT tokens (no localStorage for security)
  */
 
-import { create } from 'zustand';
+import { create } from "zustand";
 
 interface AuthState {
   token: string | null;
   userId: string | null;
   expiresAt: number | null;
-  provider: 'google' | 'kakao' | null;
+  provider: "google" | "kakao" | null;
 }
 
 interface AuthActions {
@@ -18,7 +18,7 @@ interface AuthActions {
     token: string;
     userId: string;
     expiresAt: number;
-    provider: 'google' | 'kakao';
+    provider: "google" | "kakao";
   }) => void;
   clearAuth: () => void;
   isAuthenticated: () => boolean;

@@ -9,9 +9,9 @@
 // ============================================================================
 
 export enum NativeToWebMessageType {
-  AUTH_TOKEN = 'AUTH_TOKEN',
-  AUTH_ERROR = 'AUTH_ERROR',
-  LOGOUT_SUCCESS = 'LOGOUT_SUCCESS',
+  AUTH_TOKEN = "AUTH_TOKEN",
+  AUTH_ERROR = "AUTH_ERROR",
+  LOGOUT_SUCCESS = "LOGOUT_SUCCESS",
 }
 
 export interface AuthTokenMessage {
@@ -20,7 +20,7 @@ export interface AuthTokenMessage {
     token: string;
     userId: string;
     expiresAt: number;
-    provider: 'google' | 'kakao';
+    provider: "google" | "kakao";
   };
 }
 
@@ -28,7 +28,7 @@ export interface AuthErrorMessage {
   type: NativeToWebMessageType.AUTH_ERROR;
   payload: {
     error: string;
-    provider?: 'google' | 'kakao';
+    provider?: "google" | "kakao";
   };
 }
 
@@ -44,15 +44,15 @@ export type NativeToWebMessage = AuthTokenMessage | AuthErrorMessage | LogoutSuc
 // ============================================================================
 
 export enum WebToNativeMessageType {
-  REQUEST_LOGIN = 'REQUEST_LOGIN',
-  REQUEST_LOGOUT = 'REQUEST_LOGOUT',
-  TOKEN_REFRESH_REQUEST = 'TOKEN_REFRESH_REQUEST',
+  REQUEST_LOGIN = "REQUEST_LOGIN",
+  REQUEST_LOGOUT = "REQUEST_LOGOUT",
+  TOKEN_REFRESH_REQUEST = "TOKEN_REFRESH_REQUEST",
 }
 
 export interface RequestLoginMessage {
   type: WebToNativeMessageType.REQUEST_LOGIN;
   payload: {
-    provider: 'google' | 'kakao';
+    provider: "google" | "kakao";
   };
 }
 
@@ -76,13 +76,13 @@ export type WebToNativeMessage =
 // ============================================================================
 
 export function isNativeToWebMessage(data: unknown): data is NativeToWebMessage {
-  if (!data || typeof data !== 'object') return false;
+  if (!data || typeof data !== "object") return false;
   const msg = data as { type?: string };
   return Object.values(NativeToWebMessageType).includes(msg.type as NativeToWebMessageType);
 }
 
 export function isWebToNativeMessage(data: unknown): data is WebToNativeMessage {
-  if (!data || typeof data !== 'object') return false;
+  if (!data || typeof data !== "object") return false;
   const msg = data as { type?: string };
   return Object.values(WebToNativeMessageType).includes(msg.type as WebToNativeMessageType);
 }
@@ -95,7 +95,7 @@ export function createAuthTokenMessage(
   token: string,
   userId: string,
   expiresAt: number,
-  provider: 'google' | 'kakao'
+  provider: "google" | "kakao"
 ): AuthTokenMessage {
   return {
     type: NativeToWebMessageType.AUTH_TOKEN,
@@ -103,7 +103,7 @@ export function createAuthTokenMessage(
   };
 }
 
-export function createRequestLoginMessage(provider: 'google' | 'kakao'): RequestLoginMessage {
+export function createRequestLoginMessage(provider: "google" | "kakao"): RequestLoginMessage {
   return {
     type: WebToNativeMessageType.REQUEST_LOGIN,
     payload: { provider },

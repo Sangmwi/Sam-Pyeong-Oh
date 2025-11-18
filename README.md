@@ -53,6 +53,7 @@ npm run dev:app    # Expo dev client
 ## 🔧 Development
 
 ### Web (Next.js)
+
 ```bash
 cd web
 npm run dev          # Start dev server
@@ -62,6 +63,7 @@ npm run type-check   # TypeScript type checking
 ```
 
 ### App (Expo)
+
 ```bash
 cd app
 npm run start        # Start Expo dev client
@@ -71,6 +73,7 @@ eas build --platform android  # Build APK/AAB
 ```
 
 ### Shared
+
 ```bash
 cd shared
 npm run build        # Build types and utilities
@@ -80,10 +83,12 @@ npm run type-check   # TypeScript validation
 ## 🌐 Deployment
 
 ### Web (Vercel)
+
 - Push to `main` branch → Auto-deploy via GitHub Actions
 - Manual: `vercel --prod`
 
 ### App (EAS)
+
 - Push to `main` branch → Auto-build via GitHub Actions
 - Manual: `eas build --platform all`
 

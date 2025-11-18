@@ -3,11 +3,15 @@
  * POST /api/threads - Create new thread
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
-import { requireAuth } from '@/lib/auth-middleware';
-import { createThreadSchema } from '@sam-pyeong-oh/shared';
-import type { APIResponse, ThreadDTO, CreateThreadDTO } from '@sam-pyeong-oh/shared';
+import { NextRequest, NextResponse } from "next/server";
+import {
+  createThreadSchema,
+  type APIResponse,
+  type CreateThreadDTO,
+  type ThreadDTO,
+} from "@sam-pyeong-oh/shared";
+import { requireAuth } from "@/lib/auth-middleware";
+import { prisma } from "@/lib/db";
 
 export async function GET(req: NextRequest) {
   try {
@@ -15,7 +19,7 @@ export async function GET(req: NextRequest) {
 
     const threads = await prisma.thread.findMany({
       where: { userId: user.userId },
-      orderBy: { updatedAt: 'desc' },
+      orderBy: { updatedAt: "desc" },
       include: {
         _count: {
           select: { messages: true },
@@ -43,11 +47,11 @@ export async function GET(req: NextRequest) {
     if (error instanceof Response) {
       return error;
     }
-    console.error('GET /api/threads error:', error);
+    console.error("GET /api/threads error:", error);
     return NextResponse.json<APIResponse>(
       {
         success: false,
-        error: { message: 'Internal server error' },
+        error: { message: "Internal server error" },
       },
       { status: 500 }
     );
@@ -66,7 +70,7 @@ export async function POST(req: NextRequest) {
         {
           success: false,
           error: {
-            message: 'Invalid request body',
+            message: "Invalid request body",
             details: validation.error.errors,
           },
         },
@@ -100,11 +104,11 @@ export async function POST(req: NextRequest) {
     if (error instanceof Response) {
       return error;
     }
-    console.error('POST /api/threads error:', error);
+    console.error("POST /api/threads error:", error);
     return NextResponse.json<APIResponse>(
       {
         success: false,
-        error: { message: 'Internal server error' },
+        error: { message: "Internal server error" },
       },
       { status: 500 }
     );

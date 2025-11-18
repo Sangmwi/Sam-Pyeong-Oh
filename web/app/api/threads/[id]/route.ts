@@ -4,11 +4,15 @@
  * DELETE /api/threads/[id] - Delete thread
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
-import { requireAuth, forbiddenResponse } from '@/lib/auth-middleware';
-import { updateThreadSchema } from '@sam-pyeong-oh/shared';
-import type { APIResponse, ThreadDTO, UpdateThreadDTO } from '@sam-pyeong-oh/shared';
+import { NextRequest, NextResponse } from "next/server";
+import {
+  updateThreadSchema,
+  type APIResponse,
+  type ThreadDTO,
+  type UpdateThreadDTO,
+} from "@sam-pyeong-oh/shared";
+import { forbiddenResponse, requireAuth } from "@/lib/auth-middleware";
+import { prisma } from "@/lib/db";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -20,7 +24,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json<APIResponse>(
         {
           success: false,
-          error: { message: 'Invalid thread ID' },
+          error: { message: "Invalid thread ID" },
         },
         { status: 400 }
       );
@@ -39,14 +43,14 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json<APIResponse>(
         {
           success: false,
-          error: { message: 'Thread not found' },
+          error: { message: "Thread not found" },
         },
         { status: 404 }
       );
     }
 
     if (thread.userId !== user.userId) {
-      return forbiddenResponse('You do not have access to this thread');
+      return forbiddenResponse("You do not have access to this thread");
     }
 
     const response: ThreadDTO = {
@@ -69,11 +73,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     if (error instanceof Response) {
       return error;
     }
-    console.error('GET /api/threads/[id] error:', error);
+    console.error("GET /api/threads/[id] error:", error);
     return NextResponse.json<APIResponse>(
       {
         success: false,
-        error: { message: 'Internal server error' },
+        error: { message: "Internal server error" },
       },
       { status: 500 }
     );
@@ -91,7 +95,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return NextResponse.json<APIResponse>(
         {
           success: false,
-          error: { message: 'Invalid thread ID' },
+          error: { message: "Invalid thread ID" },
         },
         { status: 400 }
       );
@@ -104,7 +108,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         {
           success: false,
           error: {
-            message: 'Invalid request body',
+            message: "Invalid request body",
             details: validation.error.errors,
           },
         },
@@ -121,14 +125,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return NextResponse.json<APIResponse>(
         {
           success: false,
-          error: { message: 'Thread not found' },
+          error: { message: "Thread not found" },
         },
         { status: 404 }
       );
     }
 
     if (existingThread.userId !== user.userId) {
-      return forbiddenResponse('You do not have permission to update this thread');
+      return forbiddenResponse("You do not have permission to update this thread");
     }
 
     const thread = await prisma.thread.update({
@@ -155,11 +159,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (error instanceof Response) {
       return error;
     }
-    console.error('PATCH /api/threads/[id] error:', error);
+    console.error("PATCH /api/threads/[id] error:", error);
     return NextResponse.json<APIResponse>(
       {
         success: false,
-        error: { message: 'Internal server error' },
+        error: { message: "Internal server error" },
       },
       { status: 500 }
     );
@@ -176,7 +180,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       return NextResponse.json<APIResponse>(
         {
           success: false,
-          error: { message: 'Invalid thread ID' },
+          error: { message: "Invalid thread ID" },
         },
         { status: 400 }
       );
@@ -191,14 +195,14 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       return NextResponse.json<APIResponse>(
         {
           success: false,
-          error: { message: 'Thread not found' },
+          error: { message: "Thread not found" },
         },
         { status: 404 }
       );
     }
 
     if (thread.userId !== user.userId) {
-      return forbiddenResponse('You do not have permission to delete this thread');
+      return forbiddenResponse("You do not have permission to delete this thread");
     }
 
     await prisma.thread.delete({
@@ -216,11 +220,11 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     if (error instanceof Response) {
       return error;
     }
-    console.error('DELETE /api/threads/[id] error:', error);
+    console.error("DELETE /api/threads/[id] error:", error);
     return NextResponse.json<APIResponse>(
       {
         success: false,
-        error: { message: 'Internal server error' },
+        error: { message: "Internal server error" },
       },
       { status: 500 }
     );

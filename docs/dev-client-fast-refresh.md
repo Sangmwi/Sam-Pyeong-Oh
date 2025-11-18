@@ -11,12 +11,14 @@ Expo Dev Client에서 Fast Refresh를 사용하여 코드 변경 시 즉시 앱�
 ### 1. 초기 설정 (한 번만)
 
 #### Android 빌드
+
 ```bash
 cd app
 npm run android:dev
 ```
 
 #### iOS 빌드
+
 ```bash
 cd app
 npm run ios:dev
@@ -29,12 +31,14 @@ npm run ios:dev
 ### 2. 개발 서버 시작
 
 #### 기본 시작
+
 ```bash
 cd app
 npm start
 ```
 
 #### 캐시 클리어 후 시작 (문제 발생 시)
+
 ```bash
 cd app
 npm run start:dev
@@ -78,13 +82,13 @@ export default function Index() {
 ```javascript
 // ✅ Fast Refresh 최적화 설정 완료
 config.watchFolders = [
-  path.resolve(__dirname, '..'), // 루트 디렉토리 감시
+  path.resolve(__dirname, ".."), // 루트 디렉토리 감시
 ];
 
 config.server = {
   enhanceMiddleware: (middleware) => {
     return (req, res, next) => {
-      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader("Access-Control-Allow-Origin", "*");
       return middleware(req, res, next);
     };
   },
@@ -100,7 +104,7 @@ config.server = {
 ```typescript
 // shared/src/bridge/messages.ts 수정
 export interface NewMessage {
-  type: 'NEW_TYPE';
+  type: "NEW_TYPE";
   payload: { data: string };
 }
 ```
@@ -114,17 +118,20 @@ export interface NewMessage {
 ### Fast Refresh가 작동하지 않을 때
 
 #### 1. Metro 서버 재시작
+
 ```bash
 # 터미널에서 Ctrl+C로 중지
 npm run start:dev  # 캐시 클리어 후 재시작
 ```
 
 #### 2. Dev Client 앱 재시작
+
 - 앱 완전히 종료
 - Dev Client 앱 다시 실행
 - 개발 서버에 재연결
 
 #### 3. 네이티브 코드 변경 시
+
 ```bash
 # 네이티브 코드 변경했을 때만 필요
 npm run android:dev  # Android
@@ -132,6 +139,7 @@ npm run ios:dev      # iOS
 ```
 
 #### 4. 캐시 완전히 삭제
+
 ```bash
 cd app
 rm -rf node_modules/.cache
@@ -169,6 +177,7 @@ function Counter() {
 ### 3. 개발자 메뉴
 
 **R 키 한 번** 또는 **흔들기** → 개발자 메뉴:
+
 - Reload
 - Debug Remote JS
 - Toggle Performance Monitor
@@ -178,12 +187,12 @@ function Counter() {
 
 ## 📊 Fast Refresh vs Hot Reload
 
-| 기능 | Fast Refresh | Hot Reload (구버전) |
-|------|--------------|---------------------|
-| 상태 유지 | ✅ | ❌ |
-| 에러 복구 | ✅ | ❌ |
-| Hooks 지원 | ✅ | ⚠️ 제한적 |
-| 속도 | 매우 빠름 | 느림 |
+| 기능       | Fast Refresh | Hot Reload (구버전) |
+| ---------- | ------------ | ------------------- |
+| 상태 유지  | ✅           | ❌                  |
+| 에러 복구  | ✅           | ❌                  |
+| Hooks 지원 | ✅           | ⚠️ 제한적           |
+| 속도       | 매우 빠름    | 느림                |
 
 ---
 

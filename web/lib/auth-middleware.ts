@@ -4,8 +4,8 @@
  * Validates JWT token and extracts user information
  */
 
-import { NextRequest } from 'next/server';
-import { extractTokenFromHeader, verifyToken, type JWTPayload } from './jwt';
+import { NextRequest } from "next/server";
+import { extractTokenFromHeader, verifyToken, type JWTPayload } from "./jwt";
 
 export interface AuthenticatedRequest {
   user: JWTPayload;
@@ -17,7 +17,7 @@ export interface AuthenticatedRequest {
  * @returns User payload if authenticated, null otherwise
  */
 export async function authorize(req: NextRequest): Promise<JWTPayload | null> {
-  const authHeader = req.headers.get('authorization');
+  const authHeader = req.headers.get("authorization");
   const token = extractTokenFromHeader(authHeader);
 
   if (!token) {
@@ -40,11 +40,11 @@ export async function requireAuth(req: NextRequest): Promise<JWTPayload> {
     throw new Response(
       JSON.stringify({
         success: false,
-        error: { message: 'Unauthorized', code: 'UNAUTHORIZED' },
+        error: { message: "Unauthorized", code: "UNAUTHORIZED" },
       }),
       {
         status: 401,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
@@ -55,15 +55,15 @@ export async function requireAuth(req: NextRequest): Promise<JWTPayload> {
 /**
  * Create unauthorized response
  */
-export function unauthorizedResponse(message: string = 'Unauthorized') {
+export function unauthorizedResponse(message: string = "Unauthorized") {
   return new Response(
     JSON.stringify({
       success: false,
-      error: { message, code: 'UNAUTHORIZED' },
+      error: { message, code: "UNAUTHORIZED" },
     }),
     {
       status: 401,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     }
   );
 }
@@ -71,15 +71,15 @@ export function unauthorizedResponse(message: string = 'Unauthorized') {
 /**
  * Create forbidden response
  */
-export function forbiddenResponse(message: string = 'Forbidden') {
+export function forbiddenResponse(message: string = "Forbidden") {
   return new Response(
     JSON.stringify({
       success: false,
-      error: { message, code: 'FORBIDDEN' },
+      error: { message, code: "FORBIDDEN" },
     }),
     {
       status: 403,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     }
   );
 }

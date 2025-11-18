@@ -6,12 +6,12 @@
 
 import {
   NativeToWebMessageType,
-  type AuthTokenMessage,
   type AuthErrorMessage,
+  type AuthTokenMessage,
   type LogoutSuccessMessage,
-} from '@sam-pyeong-oh/shared';
-import { useAuthStore } from '@/store/auth';
-import { useMessageHandler } from './useMessageHandler';
+} from "@sam-pyeong-oh/shared";
+import { useAuthStore } from "@/store/auth";
+import { useMessageHandler } from "./useMessageHandler";
 
 export function useAuthMessage() {
   const { setAuth, clearAuth } = useAuthStore();
@@ -39,7 +39,7 @@ export function useAuthMessage() {
   useMessageHandler<AuthErrorMessage>(
     NativeToWebMessageType.AUTH_ERROR,
     (message) => {
-      console.error('Auth error from native:', message.payload.error);
+      console.error("Auth error from native:", message.payload.error);
       // TODO: 사용자에게 에러 표시
     },
     []

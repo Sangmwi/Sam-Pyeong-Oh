@@ -4,19 +4,19 @@
  * Token generation and verification for API routes
  */
 
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
 
 if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is not set');
+  throw new Error("JWT_SECRET environment variable is not set");
 }
 
 export interface JWTPayload {
   userId: string;
   email: string;
-  provider: 'google' | 'kakao';
+  provider: "google" | "kakao";
 }
 
 /**
@@ -36,7 +36,7 @@ export function verifyToken(token: string): JWTPayload | null {
     const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
     return decoded;
   } catch (error) {
-    console.error('JWT verification failed:', error);
+    console.error("JWT verification failed:", error);
     return null;
   }
 }

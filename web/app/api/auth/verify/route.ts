@@ -4,11 +4,10 @@
  * Verify JWT token and create/update user in database
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
-import { generateToken, getTokenExpiry } from '@/lib/jwt';
-import { verifyTokenSchema } from '@sam-pyeong-oh/shared';
-import type { APIResponse, AuthTokenDTO } from '@sam-pyeong-oh/shared';
+import { NextRequest, NextResponse } from "next/server";
+import { verifyTokenSchema, type APIResponse, type AuthTokenDTO } from "@sam-pyeong-oh/shared";
+import { prisma } from "@/lib/db";
+import { generateToken, getTokenExpiry } from "@/lib/jwt";
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,7 +20,7 @@ export async function POST(req: NextRequest) {
         {
           success: false,
           error: {
-            message: 'Invalid request body',
+            message: "Invalid request body",
             details: validation.error.errors,
           },
         },
@@ -31,9 +30,9 @@ export async function POST(req: NextRequest) {
 
     // In a real app, you would verify OAuth token with provider here
     // For now, we'll create a mock user for demonstration
-    const mockUserId = 'user_' + Date.now();
-    const mockEmail = 'user@example.com';
-    const mockProvider: 'google' | 'kakao' = 'google';
+    const mockUserId = "user_" + Date.now();
+    const mockEmail = "user@example.com";
+    const mockProvider: "google" | "kakao" = "google";
 
     // Upsert user in database
     const user = await prisma.user.upsert({
@@ -47,7 +46,7 @@ export async function POST(req: NextRequest) {
         email: mockEmail,
         provider: mockProvider,
         providerId: mockUserId,
-        name: 'Test User',
+        name: "Test User",
       },
       update: {
         updatedAt: new Date(),
@@ -77,11 +76,11 @@ export async function POST(req: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Auth verification error:', error);
+    console.error("Auth verification error:", error);
     return NextResponse.json<APIResponse>(
       {
         success: false,
-        error: { message: 'Internal server error' },
+        error: { message: "Internal server error" },
       },
       { status: 500 }
     );
