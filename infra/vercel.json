@@ -1,0 +1,15 @@
+{
+  "buildCommand": "cd .. && npm install && npm run build:shared && cd web && npm run build",
+  "outputDirectory": "web/.next",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "regions": ["icn1"],
+  "env": {
+    "DATABASE_URL": "@database-url",
+    "JWT_SECRET": "@jwt-secret",
+    "OPENAI_API_KEY": "@openai-api-key",
+    "NEXT_PUBLIC_SUPABASE_URL": "@supabase-url",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase-anon-key",
+    "SUPABASE_SERVICE_ROLE_KEY": "@supabase-service-role-key"
+  }
+}

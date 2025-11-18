@@ -1,0 +1,69 @@
+// Prisma Schema for Sam-Pyeong-Oh
+// Database: Supabase (PostgreSQL)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// User Model
+// ============================================================================
+
+model User {
+  id         String   @id @default(cuid())
+  email      String   @unique
+  name       String?
+  provider   String   // 'google' | 'kakao'
+  providerId String   // OAuth provider user ID
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  threads Thread[]
+
+  @@unique([provider, providerId])
+  @@index([email])
+  @@map("users")
+}
+
+// ============================================================================
+// Thread Model
+// ============================================================================
+
+model Thread {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@index([userId, createdAt])
+  @@map("threads")
+}
+
+// ============================================================================
+// Message Model
+// ============================================================================
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  threadId  Int
+  role      String   // 'user' | 'assistant' | 'system'
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  // Relations
+  thread Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId, createdAt])
+  @@map("messages")
+}
