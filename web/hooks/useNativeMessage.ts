@@ -15,8 +15,10 @@ export function useNativeMessage() {
   useMessageHandler(
     NativeToWebMessageType.AUTH_TOKEN,
     (message) => {
-      const { token, userId, expiresAt, provider } = message.payload;
-      setAuth({ token, userId, expiresAt, provider });
+      if (message.type === NativeToWebMessageType.AUTH_TOKEN) {
+        const { token, userId, expiresAt, provider } = message.payload;
+        setAuth({ token, userId, expiresAt, provider });
+      }
     },
     [setAuth]
   );
@@ -34,8 +36,10 @@ export function useNativeMessage() {
   useMessageHandler(
     NativeToWebMessageType.AUTH_ERROR,
     (message) => {
-      console.error("Auth error from native:", message.payload.error);
-      // TODO: 사용자에게 에러 표시
+      if (message.type === NativeToWebMessageType.AUTH_ERROR) {
+        console.error("Auth error from native:", message.payload.error);
+        // TODO: 사용자에게 에러 표시
+      }
     },
     []
   );

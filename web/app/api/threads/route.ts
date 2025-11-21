@@ -27,14 +27,16 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    const response: ThreadDTO[] = threads.map((thread) => ({
-      id: thread.id,
-      userId: thread.userId,
-      title: thread.title,
-      createdAt: thread.createdAt.toISOString(),
-      updatedAt: thread.updatedAt.toISOString(),
-      messageCount: thread._count.messages,
-    }));
+    const response: ThreadDTO[] = threads.map(
+      (thread: (typeof threads)[number]): ThreadDTO => ({
+        id: thread.id,
+        userId: thread.userId,
+        title: thread.title,
+        createdAt: thread.createdAt.toISOString(),
+        updatedAt: thread.updatedAt.toISOString(),
+        messageCount: thread._count.messages,
+      })
+    );
 
     return NextResponse.json<APIResponse<ThreadDTO[]>>(
       {

@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "scheme": "sampyeongo",
+    "scheme": "sampyeongoh",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -14,10 +14,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.sampyeongo.app"
+      "bundleIdentifier": "com.sampyeongoh.app"
     },
     "android": {
-      "package": "com.sampyeongo.app",
+      "package": "com.sampyeongoh.app",
       "permissions": ["android.permission.INTERNET"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",

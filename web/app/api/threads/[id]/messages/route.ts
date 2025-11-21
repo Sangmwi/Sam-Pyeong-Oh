@@ -53,13 +53,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       orderBy: { createdAt: "asc" },
     });
 
-    const response: MessageDTO[] = messages.map((msg) => ({
-      id: msg.id,
-      threadId: msg.threadId,
-      role: msg.role as "user" | "assistant" | "system",
-      content: msg.content,
-      createdAt: msg.createdAt.toISOString(),
-    }));
+    const response: MessageDTO[] = messages.map(
+      (msg: (typeof messages)[number]): MessageDTO => ({
+        id: msg.id,
+        threadId: msg.threadId,
+        role: msg.role as "user" | "assistant" | "system",
+        content: msg.content,
+        createdAt: msg.createdAt.toISOString(),
+      })
+    );
 
     return NextResponse.json<APIResponse<MessageDTO[]>>(
       {

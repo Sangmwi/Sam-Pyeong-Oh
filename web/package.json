@@ -33,6 +33,7 @@
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.2",
     "autoprefixer": "^10.4.20",
+    "babel-plugin-react-compiler": "^1.0.0",
     "eslint": "^9.18.0",
     "eslint-config-next": "^15.1.7",
     "prisma": "^6.2.1",

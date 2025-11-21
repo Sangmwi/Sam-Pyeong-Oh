@@ -20,7 +20,7 @@ export interface AuthTokenMessage {
     token: string;
     userId: string;
     expiresAt: number;
-    provider: "google" | "kakao";
+    provider: "google";
   };
 }
 
@@ -28,7 +28,7 @@ export interface AuthErrorMessage {
   type: NativeToWebMessageType.AUTH_ERROR;
   payload: {
     error: string;
-    provider?: "google" | "kakao";
+    provider?: "google";
   };
 }
 
@@ -52,7 +52,7 @@ export enum WebToNativeMessageType {
 export interface RequestLoginMessage {
   type: WebToNativeMessageType.REQUEST_LOGIN;
   payload: {
-    provider: "google" | "kakao";
+    provider: "google";
   };
 }
 
@@ -95,7 +95,7 @@ export function createAuthTokenMessage(
   token: string,
   userId: string,
   expiresAt: number,
-  provider: "google" | "kakao"
+  provider: "google"
 ): AuthTokenMessage {
   return {
     type: NativeToWebMessageType.AUTH_TOKEN,
@@ -103,7 +103,21 @@ export function createAuthTokenMessage(
   };
 }
 
-export function createRequestLoginMessage(provider: "google" | "kakao"): RequestLoginMessage {
+export function createAuthErrorMessage(error: string, provider?: "google"): AuthErrorMessage {
+  return {
+    type: NativeToWebMessageType.AUTH_ERROR,
+    payload: { error, provider },
+  };
+}
+
+export function createLogoutSuccessMessage(): LogoutSuccessMessage {
+  return {
+    type: NativeToWebMessageType.LOGOUT_SUCCESS,
+    payload: {},
+  };
+}
+
+export function createRequestLoginMessage(provider: "google"): RequestLoginMessage {
   return {
     type: WebToNativeMessageType.REQUEST_LOGIN,
     payload: { provider },

@@ -12,7 +12,7 @@ export interface UserDTO {
   id: string;
   email: string;
   name: string | null;
-  provider: "google" | "kakao";
+  provider: "google";
   createdAt: string;
   updatedAt: string;
 }
@@ -20,7 +20,7 @@ export interface UserDTO {
 export interface CreateUserDTO {
   email: string;
   name?: string;
-  provider: "google" | "kakao";
+  provider: "google";
   providerId: string;
 }
 

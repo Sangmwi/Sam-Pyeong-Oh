@@ -4,7 +4,20 @@
  * 확장 가능한 메시지 핸들러 시스템
  */
 
-import { NativeToWebMessageType, type NativeToWebMessage } from "@sam-pyeong-oh/shared";
+import {
+  NativeToWebMessageType,
+  type NativeToWebMessage,
+  type WebToNativeMessage,
+} from "@sam-pyeong-oh/shared";
+
+// React Native WebView 인터페이스 선언
+declare global {
+  interface Window {
+    ReactNativeWebView?: {
+      postMessage: (message: string) => void;
+    };
+  }
+}
 
 // 핸들러 타입 정의
 type MessageHandler<T extends NativeToWebMessage = NativeToWebMessage> = (
@@ -49,6 +62,23 @@ class MessageBridge {
    */
   emit(message: NativeToWebMessage): void {
     this.handleMessage(message);
+  }
+
+  /**
+   * Web → Native 메시지 전송
+   */
+  sendMessage(message: WebToNativeMessage): void {
+    try {
+      // React Native WebView의 postMessage API 사용
+      if (window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage(JSON.stringify(message));
+        console.log(`[MessageBridge] Sent to Native:`, message.type);
+      } else {
+        console.warn("[MessageBridge] ReactNativeWebView not available");
+      }
+    } catch (error) {
+      console.error("[MessageBridge] Failed to send message:", error);
+    }
   }
 
   /**

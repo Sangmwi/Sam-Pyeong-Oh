@@ -4,10 +4,10 @@
  * Token generation and verification for API routes
  */
 
-import jwt from "jsonwebtoken";
+import jwt, { type SignOptions } from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
+const JWT_EXPIRES_IN: string = (process.env.JWT_EXPIRES_IN || "7d") as string;
 
 if (!JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is not set");
@@ -16,7 +16,7 @@ if (!JWT_SECRET) {
 export interface JWTPayload {
   userId: string;
   email: string;
-  provider: "google" | "kakao";
+  provider: "google";
 }
 
 /**
@@ -25,7 +25,7 @@ export interface JWTPayload {
 export function generateToken(payload: JWTPayload): string {
   return jwt.sign(payload, JWT_SECRET, {
     expiresIn: JWT_EXPIRES_IN,
-  });
+  } as SignOptions);
 }
 
 /**

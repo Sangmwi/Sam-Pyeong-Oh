@@ -4,6 +4,7 @@ const nextConfig = {
   reactStrictMode: true,
   experimental: {
     optimizePackageImports: ["@sam-pyeong-oh/shared"],
+    reactCompiler: true,
   },
   webpack: (config) => {
     config.resolve.alias = {
