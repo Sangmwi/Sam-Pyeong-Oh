@@ -4,24 +4,37 @@
  * Native에서 전송되는 인증 관련 메시지(AUTH_TOKEN, LOGOUT_SUCCESS, AUTH_ERROR)를 처리합니다.
  */
 
+import { useEffect } from "react";
 import {
   NativeToWebMessageType,
+  createWebAppReadyMessage,
   type AuthErrorMessage,
   type AuthTokenMessage,
   type LogoutSuccessMessage,
 } from "@sam-pyeong-oh/shared";
 import { useAuthStore } from "@/store/auth";
 import { useMessageHandler } from "./useMessageHandler";
+import { useNativeMessage } from "./useNativeMessage";
 
 export function useAuthMessage() {
   const { setAuth, clearAuth } = useAuthStore();
+  const { sendMessage } = useNativeMessage();
+
+  // 앱 초기화 시 준비 완료 메시지 전송
+  useEffect(() => {
+    console.log("[useAuthMessage] Sending WEB_APP_READY message");
+    sendMessage(createWebAppReadyMessage());
+  }, [sendMessage]);
 
   // AUTH_TOKEN 메시지 처리
   useMessageHandler<AuthTokenMessage>(
     NativeToWebMessageType.AUTH_TOKEN,
     (message) => {
+      console.log("[useAuthMessage] AUTH_TOKEN received");
       const { token, userId, expiresAt, provider } = message.payload;
+      console.log("[useAuthMessage] Calling setAuth");
       setAuth({ token, userId, expiresAt, provider });
+      console.log("[useAuthMessage] setAuth completed");
     },
     [setAuth]
   );

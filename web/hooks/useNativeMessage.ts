@@ -1,46 +1,31 @@
 /**
  * Custom Hook: Native WebView 메시지 리스너
  *
- * 확장 가능한 메시지 핸들러 시스템 사용
+ * Web → Native 메시지 전송 유틸리티
  */
 
-import { NativeToWebMessageType } from "@sam-pyeong-oh/shared";
-import { useAuthStore } from "@/store/auth";
-import { useMessageHandler } from "./useMessageHandler";
+import { useCallback } from "react";
+import type { WebToNativeMessage } from "@sam-pyeong-oh/shared";
 
 export function useNativeMessage() {
-  const { setAuth, clearAuth } = useAuthStore();
-
-  // AUTH_TOKEN 메시지 처리
-  useMessageHandler(
-    NativeToWebMessageType.AUTH_TOKEN,
-    (message) => {
-      if (message.type === NativeToWebMessageType.AUTH_TOKEN) {
-        const { token, userId, expiresAt, provider } = message.payload;
-        setAuth({ token, userId, expiresAt, provider });
+  /**
+   * Web → Native 메시지 전송
+   */
+  const sendMessage = useCallback((message: WebToNativeMessage) => {
+    try {
+      if (window.ReactNativeWebView) {
+        console.log("[useNativeMessage] Sending message to Native:", message.type);
+        window.ReactNativeWebView.postMessage(JSON.stringify(message));
+        console.log("[useNativeMessage] Message sent successfully");
+      } else {
+        console.warn("[useNativeMessage] ReactNativeWebView not available (running in browser?)");
       }
-    },
-    [setAuth]
-  );
+    } catch (error) {
+      console.error("[useNativeMessage] Failed to send message:", error);
+    }
+  }, []); // 의존성 없음 - 함수는 항상 동일
 
-  // LOGOUT_SUCCESS 메시지 처리
-  useMessageHandler(
-    NativeToWebMessageType.LOGOUT_SUCCESS,
-    () => {
-      clearAuth();
-    },
-    [clearAuth]
-  );
-
-  // AUTH_ERROR 메시지 처리
-  useMessageHandler(
-    NativeToWebMessageType.AUTH_ERROR,
-    (message) => {
-      if (message.type === NativeToWebMessageType.AUTH_ERROR) {
-        console.error("Auth error from native:", message.payload.error);
-        // TODO: 사용자에게 에러 표시
-      }
-    },
-    []
-  );
+  return {
+    sendMessage,
+  };
 }

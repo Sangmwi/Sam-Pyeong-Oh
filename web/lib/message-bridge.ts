@@ -72,7 +72,6 @@ class MessageBridge {
       // React Native WebView의 postMessage API 사용
       if (window.ReactNativeWebView) {
         window.ReactNativeWebView.postMessage(JSON.stringify(message));
-        console.log(`[MessageBridge] Sent to Native:`, message.type);
       } else {
         console.warn("[MessageBridge] ReactNativeWebView not available");
       }
@@ -116,15 +115,20 @@ class MessageBridge {
     this.messageListener = (event: MessageEvent) => {
       try {
         const message = JSON.parse(event.data) as NativeToWebMessage;
+        console.log("[MessageBridge] Received message:", message.type);
+        console.log("[MessageBridge] Message data:", event.data);
+        console.log("[MessageBridge] Handlers count:", this.handlers.get(message.type)?.size || 0);
         this.handleMessage(message);
+        console.log("[MessageBridge] handleMessage completed");
       } catch (error) {
         // 다른 출처의 메시지는 무시
-        console.debug("Ignored non-bridge message:", error);
+        // console.debug("Ignored non-bridge message:", error);
       }
     };
 
     window.addEventListener("message", this.messageListener);
     this.isInitialized = true;
+    console.log("[MessageBridge] Initialized");
   }
 
   /**

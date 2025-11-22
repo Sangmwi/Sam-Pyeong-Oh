@@ -1,22 +1,33 @@
 /**
- * Authentication Middleware for API Routes
+ * Authentication Middleware for API Routes (Supabase Auth)
  *
- * Validates JWT token and extracts user information
+ * Validates Supabase session token and extracts user information
  */
 
 import { NextRequest } from "next/server";
-import { extractTokenFromHeader, verifyToken, type JWTPayload } from "./jwt";
+import { createClient } from "@/lib/supabase/server";
+import type { User } from "@supabase/supabase-js";
 
-export interface AuthenticatedRequest {
-  user: JWTPayload;
+export interface AuthenticatedUser {
+  userId: string;
+  email: string;
 }
 
 /**
- * Authorize request and extract user from JWT
- *
- * @returns User payload if authenticated, null otherwise
+ * Extract token from Authorization header
  */
-export async function authorize(req: NextRequest): Promise<JWTPayload | null> {
+function extractTokenFromHeader(authHeader: string | null): string | null {
+  if (!authHeader) return null;
+  const match = authHeader.match(/^Bearer (.+)$/i);
+  return match ? match[1] : null;
+}
+
+/**
+ * Authorize request and extract user from Supabase session
+ *
+ * @returns User information if authenticated, null otherwise
+ */
+export async function authorize(req: NextRequest): Promise<AuthenticatedUser | null> {
   const authHeader = req.headers.get("authorization");
   const token = extractTokenFromHeader(authHeader);
 
@@ -24,8 +35,28 @@ export async function authorize(req: NextRequest): Promise<JWTPayload | null> {
     return null;
   }
 
-  const payload = verifyToken(token);
-  return payload;
+  try {
+    const supabase = await createClient();
+
+    // Verify token with Supabase
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser(token);
+
+    if (error || !user) {
+      console.error("[Auth Middleware] Invalid token:", error);
+      return null;
+    }
+
+    return {
+      userId: user.id,
+      email: user.email || "",
+    };
+  } catch (error) {
+    console.error("[Auth Middleware] Authorization error:", error);
+    return null;
+  }
 }
 
 /**
@@ -33,7 +64,7 @@ export async function authorize(req: NextRequest): Promise<JWTPayload | null> {
  *
  * @throws Response with 401 status if not authenticated
  */
-export async function requireAuth(req: NextRequest): Promise<JWTPayload> {
+export async function requireAuth(req: NextRequest): Promise<AuthenticatedUser> {
   const user = await authorize(req);
 
   if (!user) {

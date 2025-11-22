@@ -47,6 +47,7 @@ export enum WebToNativeMessageType {
   REQUEST_LOGIN = "REQUEST_LOGIN",
   REQUEST_LOGOUT = "REQUEST_LOGOUT",
   TOKEN_REFRESH_REQUEST = "TOKEN_REFRESH_REQUEST",
+  WEB_APP_READY = "WEB_APP_READY",
 }
 
 export interface RequestLoginMessage {
@@ -66,10 +67,16 @@ export interface TokenRefreshRequestMessage {
   payload: Record<string, never>;
 }
 
+export interface WebAppReadyMessage {
+  type: WebToNativeMessageType.WEB_APP_READY;
+  payload: Record<string, never>;
+}
+
 export type WebToNativeMessage =
   | RequestLoginMessage
   | RequestLogoutMessage
-  | TokenRefreshRequestMessage;
+  | TokenRefreshRequestMessage
+  | WebAppReadyMessage;
 
 // ============================================================================
 // Type Guards
@@ -127,6 +134,13 @@ export function createRequestLoginMessage(provider: "google"): RequestLoginMessa
 export function createRequestLogoutMessage(): RequestLogoutMessage {
   return {
     type: WebToNativeMessageType.REQUEST_LOGOUT,
+    payload: {},
+  };
+}
+
+export function createWebAppReadyMessage(): WebAppReadyMessage {
+  return {
+    type: WebToNativeMessageType.WEB_APP_READY,
     payload: {},
   };
 }

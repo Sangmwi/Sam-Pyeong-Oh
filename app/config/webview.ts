@@ -76,6 +76,7 @@ export function getWebViewConfig(): Partial<WebViewProps> {
  * - Add custom event listeners
  * - Enhance navigation behavior
  * - Implement custom error handling
+ * - Bridge React Native postMessage to window.postMessage
  */
 export const WEBVIEW_INJECTED_JAVASCRIPT = `
   (function() {
@@ -84,37 +85,6 @@ export const WEBVIEW_INJECTED_JAVASCRIPT = `
     meta.name = 'viewport';
     meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
     document.getElementsByTagName('head')[0].appendChild(meta);
-
-    // Log console messages to React Native (helpful for debugging)
-    const originalLog = console.log;
-    console.log = function(...args) {
-      window.ReactNativeWebView?.postMessage(JSON.stringify({
-        type: 'CONSOLE_LOG',
-        payload: { message: args.join(' ') }
-      }));
-      originalLog.apply(console, args);
-    };
-
-    // Notify React Native when page is fully loaded
-    window.addEventListener('load', function() {
-      window.ReactNativeWebView?.postMessage(JSON.stringify({
-        type: 'PAGE_LOADED',
-        payload: { url: window.location.href }
-      }));
-    });
-
-    // Handle unhandled errors
-    window.addEventListener('error', function(event) {
-      window.ReactNativeWebView?.postMessage(JSON.stringify({
-        type: 'PAGE_ERROR',
-        payload: {
-          message: event.message,
-          filename: event.filename,
-          lineno: event.lineno,
-          colno: event.colno
-        }
-      }));
-    });
   })();
   true; // Required for iOS
 `;

@@ -16,7 +16,8 @@
   "dependencies": {
     "@prisma/client": "^6.2.1",
     "@sam-pyeong-oh/shared": "*",
-    "@supabase/supabase-js": "^2.47.14",
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.84.0",
     "@tanstack/react-query": "^5.62.8",
     "jsonwebtoken": "^9.0.2",
     "next": "^15.1.7",

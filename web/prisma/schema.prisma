@@ -1,49 +1,32 @@
 // Prisma Schema for Sam-Pyeong-Oh
 // Database: Supabase (PostgreSQL)
+//
+// Note: User authentication is managed by Supabase Auth (auth.users table)
+// Prisma manages app data only (threads, messages)
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-// ============================================================================
-// User Model
-// ============================================================================
-
-model User {
-  id         String   @id @default(cuid())
-  email      String   @unique
-  name       String?
-  provider   String   // 'google' | 'kakao'
-  providerId String   // OAuth provider user ID
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  // Relations
-  threads Thread[]
-
-  @@unique([provider, providerId])
-  @@index([email])
-  @@map("users")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ============================================================================
 // Thread Model
 // ============================================================================
+// userId references auth.users.id (Supabase Auth managed)
 
 model Thread {
   id        Int      @id @default(autoincrement())
-  userId    String
+  userId    String   // References auth.users.id (UUID from Supabase Auth)
   title     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages Message[]
 
   @@index([userId, createdAt])

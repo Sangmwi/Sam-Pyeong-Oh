@@ -90,23 +90,33 @@ npm run clean                # Remove dist folder
 Sam-Pyeong-Oh/
 ├── web/                     # Next.js 15 application
 │   ├── app/                 # Next.js App Router
-│   │   ├── api/            # API Routes (auth, threads)
+│   │   ├── api/            # API Routes (threads)
 │   │   ├── layout.tsx      # Root layout
 │   │   └── page.tsx        # Home page
 │   ├── lib/                # Core utilities
+│   │   ├── supabase/       # Supabase clients
+│   │   │   ├── client.ts   # Browser client
+│   │   │   └── server.ts   # Server client (SSR)
 │   │   ├── api-client.ts   # Fetch wrapper with auto-auth
-│   │   ├── jwt.ts          # JWT utilities
+│   │   ├── auth-middleware.ts # Supabase token verification
 │   │   ├── db.ts           # Prisma client
 │   │   └── message-bridge.ts # WebView communication
 │   ├── store/              # Zustand stores
 │   │   └── auth.ts         # Auth state (memory-only)
 │   ├── hooks/              # React hooks
-│   └── prisma/             # Database schema
+│   └── prisma/             # Database schema (app data only)
 │
 ├── app/                     # Expo application
 │   ├── app/                # Expo Router
 │   │   ├── _layout.tsx     # Root layout
-│   │   └── index.tsx       # WebView container + OAuth
+│   │   └── index.tsx       # Auth gate + WebView
+│   ├── lib/                # Core utilities
+│   │   └── supabase.ts     # Supabase client (React Native)
+│   ├── services/           # Business logic
+│   │   └── auth/
+│   │       └── supabase-auth.ts # Supabase Auth service
+│   ├── hooks/              # React hooks
+│   │   └── useSupabaseAuth.ts # Auth state + WebView bridge
 │   └── app.json            # Expo configuration
 │
 └── shared/                  # Shared code
@@ -119,23 +129,31 @@ Sam-Pyeong-Oh/
 
 ### Authentication Flow
 
-**Critical**: This project uses a **Native Google OAuth → WebView Bridge → Memory Store** pattern:
+**Critical**: This project uses **Supabase Auth** with a **Native OAuth → WebView Bridge → Memory Store** pattern:
 
 1. **Native Side (Expo)**:
-   - User taps "Google로 계속하기" → Native Google OAuth flow
-   - Token stored in `expo-secure-store`
-   - Token sent to WebView via `postMessage()`
+   - User taps "Google로 계속하기" → Supabase Auth Google OAuth flow
+   - Supabase session stored in `expo-secure-store` (via custom storage adapter)
+   - Access token sent to WebView via `postMessage()`
+   - Session auto-refresh handled by Supabase client
 
 2. **Web Side (Next.js)**:
    - `messageBridge` listens for native messages
-   - Token stored in Zustand (memory-only, no localStorage)
+   - Supabase access token stored in Zustand (memory-only, no localStorage)
    - `apiClient` auto-attaches `Authorization: Bearer ${token}` header
+   - API routes verify token via Supabase `auth.getUser(token)`
 
 3. **Message Bridge System**:
    - **Native → Web**: `AUTH_TOKEN`, `AUTH_ERROR`, `LOGOUT_SUCCESS`
    - **Web → Native**: `REQUEST_LOGOUT`, `TOKEN_REFRESH_REQUEST`
    - All types defined in `@shared/bridge/messages.ts`
    - **MVP Note**: Google OAuth only (Kakao support removed)
+
+4. **User Management**:
+   - User accounts managed in Supabase Auth (`auth.users` table)
+   - Prisma manages only app data (`Thread`, `Message` models)
+   - Threads/Messages reference `userId` (UUID from Supabase Auth)
+   - No local User model in Prisma schema
 
 ### Message Bridge Architecture
 
@@ -168,27 +186,73 @@ messageBridge.destroy();
 ### API Client Pattern
 
 The `apiClient` (singleton in `web/lib/api-client.ts`) automatically:
-- Attaches JWT from Zustand auth store
+- Attaches Supabase access token from Zustand auth store
 - Handles API response format: `{ success: boolean, data?: T, error?: { message: string } }`
 - Throws on error for easy try/catch usage
 
 ```typescript
-// Automatic auth header injection
-const threads = await apiClient.get<Thread[]>('/threads');
+// Automatic auth header injection (Supabase token)
+const threads = await apiClient.get<Thread[]>('/api/threads');
 
 // Skip auth for public endpoints
-const data = await apiClient.post('/auth/verify', body, { skipAuth: true });
+const data = await apiClient.post('/api/public', body, { skipAuth: true });
 ```
 
 ### Database Schema
 
-Prisma schema (`web/prisma/schema.prisma`) has three models:
+Prisma schema (`web/prisma/schema.prisma`) manages **app data only** (authentication handled by Supabase):
 
-- **User**: OAuth users (Google/Kakao) with unique `provider + providerId`
-- **Thread**: Conversation threads (many-to-one with User)
+- **Thread**: Conversation threads with `userId` (references `auth.users.id` from Supabase)
 - **Message**: Chat messages with roles (many-to-one with Thread)
 
-All cascade deletes configured (deleting User → deletes Threads → deletes Messages).
+**Important**: User authentication is managed by Supabase Auth (`auth.users` table). Prisma only manages application data (threads and messages). All thread/message records reference the Supabase user ID (UUID).
+
+### Supabase Setup
+
+This project requires a Supabase project with Google OAuth configured.
+
+**1. Create Supabase Project**:
+- Go to [supabase.com](https://supabase.com) and create a new project
+- Note your project URL and anon key from Settings → API
+- Get your database connection strings from Settings → Database
+
+**2. Configure Google OAuth**:
+- Go to Authentication → Providers → Google
+- Enable the Google provider
+- Add your Google OAuth credentials (from Google Cloud Console)
+- Add authorized redirect URLs:
+  - For development: `sampyeongoh://auth/callback`
+  - For production: Your published app's deep link scheme
+
+**3. Database Setup** (optional, for RLS):
+```sql
+-- Enable RLS on threads table
+ALTER TABLE "Thread" ENABLE ROW LEVEL SECURITY;
+
+-- Users can only see their own threads
+CREATE POLICY "Users can view own threads" ON "Thread"
+  FOR SELECT USING (auth.uid()::text = "userId");
+
+-- Users can only create their own threads
+CREATE POLICY "Users can create own threads" ON "Thread"
+  FOR INSERT WITH CHECK (auth.uid()::text = "userId");
+
+-- Similar policies for Message table
+ALTER TABLE "Message" ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own messages" ON "Message"
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM "Thread"
+      WHERE "Thread"."id" = "Message"."threadId"
+      AND "Thread"."userId" = auth.uid()::text
+    )
+  );
+```
+
+**4. Environment Variables**:
+- Copy values from Supabase dashboard to `.env.local` (web) and `.env` (app)
+- See section "4. Environment Variables" below for full configuration
 
 ## Critical Patterns
 
@@ -223,17 +287,30 @@ npm --prefix web run db:migrate  # or db:push for prototyping
 
 **Web** (`.env.local`):
 ```bash
-DATABASE_URL=          # Supabase Postgres connection string
-NEXT_PUBLIC_WEB_URL=   # For CORS/WebView (optional)
-JWT_SECRET=            # For token signing
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGci...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGci...  # For admin operations (optional)
+
+# Database (from Supabase Dashboard)
+DATABASE_URL=postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true
+DIRECT_URL=postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres
+
+# Optional
+NEXT_PUBLIC_WEB_URL=http://localhost:3000  # For CORS/WebView
 ```
 
 **App** (`.env` or Expo env):
 ```bash
-EXPO_PUBLIC_WEB_URL=   # WebView target URL
-                        # Android emulator: http://10.0.2.2:3000
-                        # iOS simulator: http://localhost:3000
-                        # Physical device: http://<YOUR_IP>:3000
+# Supabase
+EXPO_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=eyJhbGci...
+
+# WebView target URL
+EXPO_PUBLIC_WEB_URL=http://localhost:3000
+                     # Android emulator: http://10.0.2.2:3000
+                     # iOS simulator: http://localhost:3000
+                     # Physical device: http://<YOUR_IP>:3000
 ```
 
 ### 5. WebView Connection Debugging
@@ -288,16 +365,27 @@ useEffect(() => {
 }, []);
 ```
 
-### API Route Structure
+### API Route Structure (Supabase Auth)
 ```typescript
 // web/app/api/example/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/auth-middleware";
+import { requireAuth } from "@/lib/auth-middleware";
 
-export const GET = withAuth(async (request, { userId }) => {
-  // userId auto-injected by middleware
-  return NextResponse.json({ success: true, data: { ... } });
-});
+export async function GET(request: NextRequest) {
+  try {
+    // Verify Supabase token and get user info
+    const user = await requireAuth(request);
+    // user.userId and user.email available
+
+    return NextResponse.json({
+      success: true,
+      data: { userId: user.userId }
+    });
+  } catch (error) {
+    // requireAuth throws 401 Response if not authenticated
+    return error as Response;
+  }
+}
 ```
 
 ### Shared Type Usage
@@ -320,7 +408,7 @@ export interface APIResponse<T = unknown> {
 - **Backend**: Next.js API Routes, Prisma 6, Supabase
 - **State**: Zustand 5, React Query 5
 - **Validation**: Zod 3
-- **Auth**: JWT (jsonwebtoken), expo-auth-session, expo-secure-store
+- **Auth**: Supabase Auth (@supabase/supabase-js, @supabase/ssr), expo-secure-store
 - **Build**: TypeScript 5.7, npm workspaces
 
 ## Prerequisites

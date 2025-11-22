@@ -1,7 +1,8 @@
 /**
  * Authentication Store (Zustand)
  *
- * Memory-only storage for JWT tokens (no localStorage for security)
+ * Memory-only storage for Supabase session tokens (no localStorage for security)
+ * Tokens are provided by Native app via WebView message bridge
  */
 
 import { create } from "zustand";
@@ -10,7 +11,7 @@ interface AuthState {
   token: string | null;
   userId: string | null;
   expiresAt: number | null;
-  provider: "google" | "kakao" | null;
+  provider: "google" | null;
 }
 
 interface AuthActions {
@@ -18,7 +19,7 @@ interface AuthActions {
     token: string;
     userId: string;
     expiresAt: number;
-    provider: "google" | "kakao";
+    provider: "google";
   }) => void;
   clearAuth: () => void;
   isAuthenticated: () => boolean;
@@ -36,6 +37,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   // Actions
   setAuth: (auth) => {
+    console.log("[AuthStore] setAuth called", { userId: auth.userId });
     set({
       token: auth.token,
       userId: auth.userId,

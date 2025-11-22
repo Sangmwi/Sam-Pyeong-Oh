@@ -37,6 +37,7 @@ class WebViewBridge {
    */
   initialize(webViewRef: RefObject<WebView | null>): void {
     this.webViewRef = webViewRef;
+    console.log("[WebViewBridge] Initialized with ref:", !!webViewRef.current);
   }
 
   /**
@@ -73,16 +74,55 @@ class WebViewBridge {
    */
   sendMessage(message: NativeToWebMessage): void {
     try {
+      console.log("[WebViewBridge] Attempting to send:", message.type);
+      console.log("[WebViewBridge] webViewRef exists:", !!this.webViewRef);
+      console.log("[WebViewBridge] webViewRef.current exists:", !!this.webViewRef?.current);
+
       if (!this.webViewRef?.current) {
-        console.warn("[WebViewBridge] WebView ref not available");
+        console.warn("[WebViewBridge] ❌ WebView ref not available");
         return;
       }
 
       const serialized = JSON.stringify(message);
-      this.webViewRef.current.postMessage(serialized);
-      console.log(`[WebViewBridge] Sent to Web:`, message.type);
+
+      // ⚡ React Native/브라우저 모두 호환되는 Base64 인코딩
+      // btoa를 사용하되 UTF-8 문자 처리를 위해 encodeURIComponent 사용
+      const base64Message = btoa(unescape(encodeURIComponent(serialized)));
+
+      const jsCode = `
+        (function() {
+          try {
+            console.log('[WebViewBridge Injected] Starting injection');
+
+            // Base64 디코딩 (UTF-8 처리 포함)
+            var base64Str = '${base64Message}';
+            var messageStr = decodeURIComponent(escape(atob(base64Str)));
+
+            console.log('[WebViewBridge Injected] Decoded message:', messageStr.substring(0, 100));
+
+            // window.postMessage 사용
+            window.postMessage(messageStr, '*');
+
+            // 또한 CustomEvent로도 발생 (이중 안전장치)
+            var event = new MessageEvent('message', {
+              data: messageStr,
+              origin: window.location.origin
+            });
+            window.dispatchEvent(event);
+
+            console.log('[WebViewBridge Injected] ✅ Message dispatched successfully');
+          } catch (err) {
+            console.error('[WebViewBridge Injected] ❌ Error:', err.message);
+            console.error('[WebViewBridge Injected] Stack:', err.stack);
+          }
+        })();
+        true;
+      `;
+
+      this.webViewRef.current.injectJavaScript(jsCode);
+      console.log("[WebViewBridge] ✅ Message injected:", message.type);
     } catch (error) {
-      console.error("[WebViewBridge] Failed to send message:", error);
+      console.error("[WebViewBridge] ❌ Failed to send message:", error);
     }
   }
 
@@ -93,7 +133,6 @@ class WebViewBridge {
     try {
       const { data } = event.nativeEvent;
       const message: WebToNativeMessage = JSON.parse(data);
-      console.log(`[WebViewBridge] Received from Web:`, message.type);
 
       // 타입별 핸들러 실행
       const typeHandlers = this.handlers.get(message.type);
@@ -116,7 +155,7 @@ class WebViewBridge {
         }
       });
     } catch (error) {
-      console.error("[WebViewBridge] Failed to parse message:", error);
+      // console.error("[WebViewBridge] Failed to parse message:", error);
     }
   }
 

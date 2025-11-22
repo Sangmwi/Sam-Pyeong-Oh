@@ -4,7 +4,8 @@
       "Bash(npm install:*)",
       "Bash(npx tsc:*)",
       "Bash(npm run lint)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "SlashCommand(/sc:analyze)"
     ],
     "deny": [],
     "ask": []

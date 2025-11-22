@@ -10,11 +10,11 @@
 
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useAuth } from "@app/hooks/useAuth";
+import { useSupabaseAuth } from "@app/hooks/useSupabaseAuth";
 import Constants from "expo-constants";
 
 export default function SettingsTab() {
-  const { logout, user } = useAuth();
+  const { logout, email } = useSupabaseAuth();
 
   const handleLogout = () => {
     Alert.alert("로그아웃", "로그아웃 하시겠습니까?", [
@@ -41,11 +41,11 @@ export default function SettingsTab() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>계정</Text>
 
-        {user && (
+        {email && (
           <View style={styles.userInfo}>
             <Ionicons name="person-circle" size={48} color="#3b82f6" />
             <View style={styles.userDetails}>
-              <Text style={styles.userName}>{user.email || "사용자"}</Text>
+              <Text style={styles.userName}>{email}</Text>
               <Text style={styles.userProvider}>Google 계정</Text>
             </View>
           </View>
