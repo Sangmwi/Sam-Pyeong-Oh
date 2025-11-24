@@ -70,16 +70,17 @@ class WebViewBridge {
   }
 
   /**
-   * Native → Web 메시지 전송
+   * Native → Web 메시지 전송 (특정 WebView 지정)
    */
-  sendMessage(message: NativeToWebMessage): void {
+  sendMessageToRef(
+    targetRef: RefObject<WebView | null> | null,
+    message: NativeToWebMessage
+  ): void {
     try {
       console.log("[WebViewBridge] Attempting to send:", message.type);
-      console.log("[WebViewBridge] webViewRef exists:", !!this.webViewRef);
-      console.log("[WebViewBridge] webViewRef.current exists:", !!this.webViewRef?.current);
 
-      if (!this.webViewRef?.current) {
-        console.warn("[WebViewBridge] ❌ WebView ref not available");
+      if (!targetRef?.current) {
+        console.warn("[WebViewBridge] ❌ Target WebView ref not available");
         return;
       }
 
@@ -92,7 +93,7 @@ class WebViewBridge {
       const jsCode = `
         (function() {
           try {
-            console.log('[WebViewBridge Injected] Starting injection');
+            console.log('[WebViewBridge Injected] Starting injection for ${message.type}');
 
             // Base64 디코딩 (UTF-8 처리 포함)
             var base64Str = '${base64Message}';
@@ -119,11 +120,18 @@ class WebViewBridge {
         true;
       `;
 
-      this.webViewRef.current.injectJavaScript(jsCode);
+      targetRef.current.injectJavaScript(jsCode);
       console.log("[WebViewBridge] ✅ Message injected:", message.type);
     } catch (error) {
       console.error("[WebViewBridge] ❌ Failed to send message:", error);
     }
+  }
+
+  /**
+   * Native → Web 메시지 전송 (저장된 ref 사용)
+   */
+  sendMessage(message: NativeToWebMessage): void {
+    this.sendMessageToRef(this.webViewRef, message);
   }
 
   /**

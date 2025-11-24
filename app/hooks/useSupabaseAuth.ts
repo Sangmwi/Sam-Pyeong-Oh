@@ -45,7 +45,7 @@ export function useSupabaseAuth(webViewRef?: RefObject<WebView | null>) {
         "google"
       );
 
-      webViewBridge.sendMessage(message);
+      webViewBridge.sendMessageToRef(webViewRef || null, message);
       console.log("[useSupabaseAuth] Session sent to WebView");
     },
     [webViewRef]
@@ -53,7 +53,7 @@ export function useSupabaseAuth(webViewRef?: RefObject<WebView | null>) {
 
   // Initialize bridge and handlers
   useEffect(() => {
-    if (webViewRef?.current) {
+    if (webViewRef) {
       webViewBridge.initialize(webViewRef);
 
       // Handle WEB_APP_READY message
@@ -80,7 +80,7 @@ export function useSupabaseAuth(webViewRef?: RefObject<WebView | null>) {
               session.expires_at || Date.now() + 3600 * 1000,
               "google"
             );
-            webViewBridge.sendMessage(message);
+            webViewBridge.sendMessageToRef(webViewRef || null, message);
             console.log("[useSupabaseAuth] ✅ AUTH_TOKEN message sent!");
           }, 100); // 100ms 딜레이
         } else {
@@ -235,7 +235,7 @@ export function useSupabaseAuth(webViewRef?: RefObject<WebView | null>) {
       // Send to WebView
       if (webViewRef) {
         const message = createLogoutSuccessMessage();
-        webViewBridge.sendMessage(message);
+        webViewBridge.sendMessageToRef(webViewRef, message);
       }
     } catch (error) {
       console.error("[useSupabaseAuth] Logout failed:", error);
