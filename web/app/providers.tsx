@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { messageBridge } from "@/lib/message-bridge";
+import { webMessageHub } from "@/lib/web-message-hub";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -17,13 +17,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
       })
   );
 
-  // 메시지 브리지 초기화 및 정리
+  // 메시지 허브 초기화 및 정리
   useEffect(() => {
-    messageBridge.initialize();
+    webMessageHub.initialize();
 
     // 컴포넌트 언마운트 시 cleanup
     return () => {
-      messageBridge.destroy();
+      webMessageHub.destroy();
     };
   }, []);
 

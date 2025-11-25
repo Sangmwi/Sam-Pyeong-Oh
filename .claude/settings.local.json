@@ -5,7 +5,9 @@
       "Bash(npx tsc:*)",
       "Bash(npm run lint)",
       "Bash(cat:*)",
-      "SlashCommand(/sc:analyze)"
+      "SlashCommand(/sc:analyze)",
+      "Bash(npm run type-check:*)",
+      "Bash(git mv:*)"
     ],
     "deny": [],
     "ask": []

@@ -10,19 +10,29 @@
 
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { useSupabaseAuth } from "@app/hooks/useSupabaseAuth";
 import Constants from "expo-constants";
 
 export default function SettingsTab() {
+  const router = useRouter();
   const { logout, email } = useSupabaseAuth();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     Alert.alert("로그아웃", "로그아웃 하시겠습니까?", [
       { text: "취소", style: "cancel" },
       {
         text: "로그아웃",
         style: "destructive",
-        onPress: () => logout(),
+        onPress: async () => {
+          try {
+            await logout();
+            // 로그아웃 후 루트 화면으로 이동
+            router.replace("/");
+          } catch (error) {
+            console.error("[Settings] Logout navigation failed:", error);
+          }
+        },
       },
     ]);
   };

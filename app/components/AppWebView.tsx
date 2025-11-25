@@ -35,15 +35,9 @@ export function AppWebView({ path }: AppWebViewProps) {
       // JavaScript 활성화
       javaScriptEnabled={true}
       domStorageEnabled={true}
-      // 페이지 로드 완료 시 테스트
+      // 페이지 로드 완료 시 초기화
       onLoadEnd={() => {
-        console.log("[AppWebView] Page loaded, testing injection...");
-        // 간단한 테스트 injection
-        webViewRef.current?.injectJavaScript(`
-          console.log('[AppWebView Test] Injection successful!');
-          window.postMessage(JSON.stringify({ type: 'TEST_INJECTION', payload: {} }), '*');
-          true;
-        `);
+        // WebView 준비 완료
       }}
       // 에러 처리
       onError={(syntheticEvent) => {

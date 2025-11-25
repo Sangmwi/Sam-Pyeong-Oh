@@ -41,9 +41,6 @@ export class GoogleOAuthProvider implements IOAuthProvider {
         scheme: "sampyeongoh",
       });
 
-      console.log("[GoogleOAuth] Redirect URI:", redirectUri);
-      console.log("[GoogleOAuth] Client ID:", clientId.substring(0, 20) + "...");
-
       // Build authorization URL
       const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${new URLSearchParams({
         client_id: clientId,
@@ -68,8 +65,6 @@ export class GoogleOAuthProvider implements IOAuthProvider {
       if (!accessToken) {
         throw new Error("액세스 토큰을 받을 수 없습니다.");
       }
-
-      console.log("[GoogleOAuth] Authentication successful");
 
       // Fetch user info from Google
       const userInfo = await this.fetchUserInfo(accessToken);

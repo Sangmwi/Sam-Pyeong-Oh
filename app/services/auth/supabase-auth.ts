@@ -36,8 +36,6 @@ export class SupabaseAuthService {
         path: "auth/callback",
       });
 
-      console.log("[SupabaseAuth] Redirect URL:", redirectUrl);
-
       // Start OAuth flow
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
@@ -50,13 +48,7 @@ export class SupabaseAuthService {
       if (error) throw error;
       if (!data?.url) throw new Error("No authorization URL received");
 
-      console.log("[SupabaseAuth] Opening browser for OAuth...");
-      console.log("[SupabaseAuth] Auth URL:", data.url);
-      console.log("[SupabaseAuth] Expected redirect URL:", redirectUrl);
-
       // Open browser for OAuth with timeout
-      console.log("[SupabaseAuth] Waiting for OAuth callback...");
-      
       const timeoutPromise = new Promise<never>((_, reject) => {
         setTimeout(() => {
           reject(new Error("OAuth 타임아웃: 브라우저에서 리다이렉트가 발생하지 않았습니다. Supabase 대시보드에서 Redirect URL이 올바르게 설정되었는지 확인하세요."));
@@ -66,9 +58,6 @@ export class SupabaseAuthService {
       const authPromise = WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
       
       const result = await Promise.race([authPromise, timeoutPromise]);
-
-      console.log("[SupabaseAuth] OAuth result received");
-      console.log("[SupabaseAuth] OAuth result type:", result.type);
 
       if (result.type !== "success") {
         // 더 자세한 에러 정보 제공
@@ -85,12 +74,8 @@ export class SupabaseAuthService {
         throw new Error("OAuth 성공했지만 리다이렉트 URL을 받지 못했습니다.");
       }
 
-      console.log("[SupabaseAuth] OAuth result URL:", resultUrl);
-      console.log("[SupabaseAuth] OAuth successful, exchanging code...");
-
       // Extract code from URL
       const url = Linking.parse(resultUrl);
-      console.log("[SupabaseAuth] Parsed URL:", JSON.stringify(url, null, 2));
       
       // Check for error parameters
       if (url.queryParams?.error) {
@@ -102,18 +87,14 @@ export class SupabaseAuthService {
 
       // Fallback: Check if code is in the hash (Implicit Flow or misconfiguration)
       if (!code && resultUrl.includes("#")) {
-        console.log("[SupabaseAuth] Checking hash for code...");
-        // Simple manual parsing for hash params
         const hashPart = resultUrl.split("#")[1];
         const hashParams = new URLSearchParams(hashPart);
         
         // Try to find code or access_token in hash
         if (hashParams.has("code")) {
           code = hashParams.get("code") as string;
-          console.log("[SupabaseAuth] Found code in hash");
         } else if (hashParams.has("access_token") && hashParams.has("refresh_token")) {
           // Implicit flow return (access_token directly)
-          console.log("[SupabaseAuth] Found access_token in hash (Implicit Flow)");
           const accessToken = hashParams.get("access_token") as string;
           const refreshToken = hashParams.get("refresh_token") as string;
           
@@ -126,7 +107,6 @@ export class SupabaseAuthService {
           if (sessionError) throw sessionError;
           if (!sessionData?.session) throw new Error("Failed to set session from implicit flow");
           
-          console.log("[SupabaseAuth] Authentication complete (Implicit)");
           return { session: sessionData.session };
         } else if (hashParams.has("error")) {
            const errorDescription = hashParams.get("error_description") || "No description";
@@ -145,9 +125,6 @@ export class SupabaseAuthService {
 
       if (sessionError) throw sessionError;
       if (!sessionData?.session) throw new Error("No session received");
-
-      console.log("[SupabaseAuth] Authentication complete");
-      console.log("[SupabaseAuth] User ID:", sessionData.session.user.id);
 
       return {
         session: sessionData.session,

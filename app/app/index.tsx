@@ -25,11 +25,8 @@ export default function Index() {
   useEffect(() => {
     // Deep linking을 통한 OAuth 콜백 처리
     const handleDeepLink = async (event: { url: string }) => {
-      console.log("[Index] Deep link received:", event.url);
-      
       // OAuth 콜백 URL인지 확인
       if (event.url.includes("auth/callback")) {
-        console.log("[Index] OAuth callback detected, completing session...");
         WebBrowser.maybeCompleteAuthSession();
       }
     };
@@ -37,7 +34,6 @@ export default function Index() {
     // 초기 URL 확인 (앱이 리다이렉트로 열린 경우)
     Linking.getInitialURL().then((url) => {
       if (url) {
-        console.log("[Index] Initial URL:", url);
         handleDeepLink({ url });
       }
     });
@@ -56,7 +52,6 @@ export default function Index() {
   // Auto-redirect to tabs when authenticated
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      // 이미 탭 화면에 있지 않으면 리다이렉트
       const inTabs = segments[0] === "(tabs)";
       if (!inTabs) {
         router.replace("/(tabs)" as any);

@@ -6,7 +6,7 @@
 
 import { useEffect } from "react";
 import type { NativeToWebMessage } from "@sam-pyeong-oh/shared";
-import { messageBridge } from "@/lib/message-bridge";
+import { webMessageHub } from "@/lib/web-message-hub";
 
 /**
  * 특정 메시지 타입에 핸들러 등록
@@ -17,7 +17,7 @@ export function useMessageHandler<T extends NativeToWebMessage>(
   deps: React.DependencyList = []
 ) {
   useEffect(() => {
-    const cleanup = messageBridge.on(type, handler);
+    const cleanup = webMessageHub.on(type, handler);
     return cleanup;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, ...deps]);
@@ -31,7 +31,7 @@ export function useGlobalMessageHandler(
   deps: React.DependencyList = []
 ) {
   useEffect(() => {
-    const cleanup = messageBridge.onAll(handler);
+    const cleanup = webMessageHub.onAll(handler);
     return cleanup;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuthMessage } from "@/hooks/useAuthMessage";
 import { useAuthStore } from "@/store/auth";
-import { messageBridge } from "@/lib/message-bridge";
+import { webMessageHub } from "@/lib/web-message-hub";
 
 export default function Home() {
   const { token } = useAuthStore();
@@ -11,27 +11,6 @@ export default function Home() {
 
   // 인증 관련 메시지 자동 처리
   useAuthMessage();
-
-  // Debug: 로그 수집
-  useEffect(() => {
-    const originalLog = console.log;
-    console.log = (...args: any[]) => {
-      const message = args.map((arg) => String(arg)).join(" ");
-      setLogs((prev) => [...prev.slice(-10), message]); // 최근 10개만
-      originalLog.apply(console, args);
-    };
-
-    console.log("[Home] Component mounted");
-    console.log("[Home] Token:", token ? token.substring(0, 20) + "..." : "NULL");
-
-    // DEBUG: 강제 초기화
-    messageBridge.initialize();
-    console.log("[Home] messageBridge initialized");
-
-    return () => {
-      console.log = originalLog;
-    };
-  }, [token]);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6">

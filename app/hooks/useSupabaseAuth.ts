@@ -10,7 +10,7 @@ import type { WebView } from "react-native-webview";
 import { createAuthTokenMessage, createLogoutSuccessMessage, WebToNativeMessageType } from "@sam-pyeong-oh/shared";
 import { SupabaseAuthService, type AuthResult } from "@app/services/auth/supabase-auth";
 import { supabase } from "@app/lib/supabase";
-import { webViewBridge } from "@app/utils/webview-bridge";
+import { nativeMessageHub } from "@app/lib/native-message-hub";
 import type { WebViewMessage } from "@app/types/webview";
 
 export interface AuthState {
@@ -45,8 +45,7 @@ export function useSupabaseAuth(webViewRef?: RefObject<WebView | null>) {
         "google"
       );
 
-      webViewBridge.sendMessageToRef(webViewRef || null, message);
-      console.log("[useSupabaseAuth] Session sent to WebView");
+      nativeMessageHub.sendMessageToRef(webViewRef || null, message);
     },
     [webViewRef]
   );
@@ -54,37 +53,26 @@ export function useSupabaseAuth(webViewRef?: RefObject<WebView | null>) {
   // Initialize bridge and handlers
   useEffect(() => {
     if (webViewRef) {
-      webViewBridge.initialize(webViewRef);
+      nativeMessageHub.initialize(webViewRef);
 
       // Handle WEB_APP_READY message
-      // 중복 등록 방지를 위해 cleanup 먼저 호출 (선택사항, webViewBridge 내부 로직에 따라 다름)
-      
-      const cleanup = webViewBridge.on(WebToNativeMessageType.WEB_APP_READY, async () => {
-        console.log("[useSupabaseAuth] ✅ Web App Ready signal received!");
+      // 중복 등록 방지를 위해 cleanup 먼저 호출 (선택사항, nativeMessageHub 내부 로직에 따라 다름)
 
+      const cleanup = nativeMessageHub.on(WebToNativeMessageType.WEB_APP_READY, async () => {
         // 현재 세션 가져오기
         const session = await SupabaseAuthService.getSession();
-        console.log("[useSupabaseAuth] Session exists:", !!session);
 
         if (session) {
-          console.log("[useSupabaseAuth] 📤 Sending stored session to Web App");
-          console.log("[useSupabaseAuth] User ID:", session.user.id);
-          console.log("[useSupabaseAuth] Token (first 20 chars):", session.access_token.substring(0, 20));
-
           // 작은 딜레이 후 메시지 전송 (WebView injection 준비 시간)
           setTimeout(() => {
-            // 직접 메시지 생성 및 전송 (sendSessionToWebView 의존성 제거)
             const message = createAuthTokenMessage(
               session.access_token,
               session.user.id,
               session.expires_at || Date.now() + 3600 * 1000,
               "google"
             );
-            webViewBridge.sendMessageToRef(webViewRef || null, message);
-            console.log("[useSupabaseAuth] ✅ AUTH_TOKEN message sent!");
-          }, 100); // 100ms 딜레이
-        } else {
-          console.log("[useSupabaseAuth] ⚠️ No session found, user needs to login");
+            nativeMessageHub.sendMessageToRef(webViewRef || null, message);
+          }, 100);
         }
       });
 
@@ -143,8 +131,6 @@ export function useSupabaseAuth(webViewRef?: RefObject<WebView | null>) {
    */
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log("[useSupabaseAuth] Auth state changed:", _event);
-
       if (session) {
         setAuthState({
           isAuthenticated: true,
@@ -222,6 +208,7 @@ export function useSupabaseAuth(webViewRef?: RefObject<WebView | null>) {
 
       await SupabaseAuthService.signOut();
 
+      // Fallback: onAuthStateChange 리스너가 작동하지 않을 경우 대비
       setAuthState({
         isAuthenticated: false,
         isLoading: false,
@@ -235,10 +222,10 @@ export function useSupabaseAuth(webViewRef?: RefObject<WebView | null>) {
       // Send to WebView
       if (webViewRef) {
         const message = createLogoutSuccessMessage();
-        webViewBridge.sendMessageToRef(webViewRef, message);
+        nativeMessageHub.sendMessageToRef(webViewRef, message);
       }
     } catch (error) {
-      console.error("[useSupabaseAuth] Logout failed:", error);
+      console.error("[useSupabaseAuth] ❌ Logout failed:", error);
       setAuthState((prev) => ({ ...prev, isLoading: false }));
       Alert.alert("오류", "로그아웃에 실패했습니다.");
       throw error;
@@ -249,7 +236,7 @@ export function useSupabaseAuth(webViewRef?: RefObject<WebView | null>) {
    * Handle WebView messages
    */
   const handleWebViewMessage = useCallback((event: WebViewMessage) => {
-    webViewBridge.handleMessage(event);
+    nativeMessageHub.handleMessage(event);
   }, []);
 
   return {

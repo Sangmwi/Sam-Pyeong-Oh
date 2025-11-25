@@ -37,7 +37,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   // Actions
   setAuth: (auth) => {
-    console.log("[AuthStore] setAuth called", { userId: auth.userId });
     set({
       token: auth.token,
       userId: auth.userId,

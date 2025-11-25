@@ -22,7 +22,6 @@ export function useAuthMessage() {
 
   // 앱 초기화 시 준비 완료 메시지 전송
   useEffect(() => {
-    console.log("[useAuthMessage] Sending WEB_APP_READY message");
     sendMessage(createWebAppReadyMessage());
   }, [sendMessage]);
 
@@ -30,11 +29,8 @@ export function useAuthMessage() {
   useMessageHandler<AuthTokenMessage>(
     NativeToWebMessageType.AUTH_TOKEN,
     (message) => {
-      console.log("[useAuthMessage] AUTH_TOKEN received");
       const { token, userId, expiresAt, provider } = message.payload;
-      console.log("[useAuthMessage] Calling setAuth");
       setAuth({ token, userId, expiresAt, provider });
-      console.log("[useAuthMessage] setAuth completed");
     },
     [setAuth]
   );

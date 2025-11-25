@@ -1,7 +1,9 @@
 /**
- * WebView Bridge System (Native Side)
+ * Native Message Hub
  *
- * 확장 가능한 메시지 핸들러 시스템 - Web과 동일한 구조
+ * Central message hub for Native platform (Expo/React Native)
+ * - Receives messages from Web (Web → Native)
+ * - Sends messages to Web (Native → Web)
  */
 
 import type { RefObject } from "react";
@@ -19,15 +21,16 @@ type MessageHandler<T extends WebToNativeMessage = WebToNativeMessage> = (
 ) => void | Promise<void>;
 
 /**
- * WebView Message Bridge (Native Side)
+ * Native Message Hub
  *
  * Features:
  * - Type-safe message handling
  * - Multiple handlers per message type
  * - Global message handlers
  * - Automatic cleanup
+ * - Targeted WebView message injection
  */
-class WebViewBridge {
+class NativeMessageHub {
   private handlers: Map<WebToNativeMessageType, Set<MessageHandler>> = new Map();
   private globalHandlers: Set<MessageHandler> = new Set();
   private webViewRef: RefObject<WebView | null> | null = null;
@@ -37,7 +40,6 @@ class WebViewBridge {
    */
   initialize(webViewRef: RefObject<WebView | null>): void {
     this.webViewRef = webViewRef;
-    console.log("[WebViewBridge] Initialized with ref:", !!webViewRef.current);
   }
 
   /**
@@ -77,10 +79,7 @@ class WebViewBridge {
     message: NativeToWebMessage
   ): void {
     try {
-      console.log("[WebViewBridge] Attempting to send:", message.type);
-
       if (!targetRef?.current) {
-        console.warn("[WebViewBridge] ❌ Target WebView ref not available");
         return;
       }
 
@@ -93,37 +92,29 @@ class WebViewBridge {
       const jsCode = `
         (function() {
           try {
-            console.log('[WebViewBridge Injected] Starting injection for ${message.type}');
-
             // Base64 디코딩 (UTF-8 처리 포함)
             var base64Str = '${base64Message}';
             var messageStr = decodeURIComponent(escape(atob(base64Str)));
 
-            console.log('[WebViewBridge Injected] Decoded message:', messageStr.substring(0, 100));
-
             // window.postMessage 사용
             window.postMessage(messageStr, '*');
 
-            // 또한 CustomEvent로도 발생 (이중 안전장치)
+            // CustomEvent로도 발생 (이중 안전장치)
             var event = new MessageEvent('message', {
               data: messageStr,
               origin: window.location.origin
             });
             window.dispatchEvent(event);
-
-            console.log('[WebViewBridge Injected] ✅ Message dispatched successfully');
           } catch (err) {
-            console.error('[WebViewBridge Injected] ❌ Error:', err.message);
-            console.error('[WebViewBridge Injected] Stack:', err.stack);
+            console.error('[NativeMessageHub] Injection error:', err.message);
           }
         })();
         true;
       `;
 
       targetRef.current.injectJavaScript(jsCode);
-      console.log("[WebViewBridge] ✅ Message injected:", message.type);
     } catch (error) {
-      console.error("[WebViewBridge] ❌ Failed to send message:", error);
+      console.error("[NativeMessageHub] Failed to send message:", error);
     }
   }
 
@@ -149,7 +140,7 @@ class WebViewBridge {
           try {
             handler(message);
           } catch (error) {
-            console.error(`[WebViewBridge] Handler error for ${message.type}:`, error);
+            console.error(`[NativeMessageHub] Handler error for ${message.type}:`, error);
           }
         });
       }
@@ -159,11 +150,11 @@ class WebViewBridge {
         try {
           handler(message);
         } catch (error) {
-          console.error("[WebViewBridge] Global handler error:", error);
+          console.error("[NativeMessageHub] Global handler error:", error);
         }
       });
     } catch (error) {
-      // console.error("[WebViewBridge] Failed to parse message:", error);
+      // console.error("[NativeMessageHub] Failed to parse message:", error);
     }
   }
 
@@ -194,19 +185,22 @@ class WebViewBridge {
 }
 
 // 싱글톤 인스턴스
-export const webViewBridge = new WebViewBridge();
+export const nativeMessageHub = new NativeMessageHub();
 
-// Legacy functions for backward compatibility (deprecated)
-/** @deprecated Use webViewBridge.sendMessage() instead */
+// Legacy exports for backward compatibility (deprecated)
+/** @deprecated Use nativeMessageHub instead */
+export const webViewBridge = nativeMessageHub;
+
+/** @deprecated Use nativeMessageHub.sendMessage() instead */
 export function sendMessageToWebView(
   webViewRef: RefObject<WebView | null>,
   message: NativeToWebMessage
 ): void {
-  webViewBridge.initialize(webViewRef);
-  webViewBridge.sendMessage(message);
+  nativeMessageHub.initialize(webViewRef);
+  nativeMessageHub.sendMessage(message);
 }
 
-/** @deprecated Use webViewBridge.handleMessage() instead */
+/** @deprecated Use nativeMessageHub.handleMessage() instead */
 export function parseWebViewMessage(event: WebViewMessage): WebToNativeMessage | null {
   try {
     const { data } = event.nativeEvent;

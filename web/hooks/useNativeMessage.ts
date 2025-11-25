@@ -14,11 +14,7 @@ export function useNativeMessage() {
   const sendMessage = useCallback((message: WebToNativeMessage) => {
     try {
       if (window.ReactNativeWebView) {
-        console.log("[useNativeMessage] Sending message to Native:", message.type);
         window.ReactNativeWebView.postMessage(JSON.stringify(message));
-        console.log("[useNativeMessage] Message sent successfully");
-      } else {
-        console.warn("[useNativeMessage] ReactNativeWebView not available (running in browser?)");
       }
     } catch (error) {
       console.error("[useNativeMessage] Failed to send message:", error);

@@ -1,7 +1,9 @@
 /**
- * WebView Message Bridge System
+ * Web Message Hub
  *
- * 확장 가능한 메시지 핸들러 시스템
+ * Central message hub for Web platform (Next.js)
+ * - Receives messages from Native (Native → Web)
+ * - Sends messages to Native (Web → Native)
  */
 
 import {
@@ -24,8 +26,16 @@ type MessageHandler<T extends NativeToWebMessage = NativeToWebMessage> = (
   message: T
 ) => void | Promise<void>;
 
-// 핸들러 레지스트리
-class MessageBridge {
+/**
+ * Web Message Hub
+ *
+ * Features:
+ * - Type-safe message handling
+ * - Multiple handlers per message type
+ * - Global message handlers
+ * - Automatic cleanup
+ */
+class WebMessageHub {
   private handlers: Map<NativeToWebMessageType, Set<MessageHandler>> = new Map();
   private globalHandlers: Set<MessageHandler> = new Set();
   private isInitialized = false;
@@ -72,11 +82,9 @@ class MessageBridge {
       // React Native WebView의 postMessage API 사용
       if (window.ReactNativeWebView) {
         window.ReactNativeWebView.postMessage(JSON.stringify(message));
-      } else {
-        console.warn("[MessageBridge] ReactNativeWebView not available");
       }
     } catch (error) {
-      console.error("[MessageBridge] Failed to send message:", error);
+      console.error("[WebMessageHub] Failed to send message:", error);
     }
   }
 
@@ -115,20 +123,14 @@ class MessageBridge {
     this.messageListener = (event: MessageEvent) => {
       try {
         const message = JSON.parse(event.data) as NativeToWebMessage;
-        console.log("[MessageBridge] Received message:", message.type);
-        console.log("[MessageBridge] Message data:", event.data);
-        console.log("[MessageBridge] Handlers count:", this.handlers.get(message.type)?.size || 0);
         this.handleMessage(message);
-        console.log("[MessageBridge] handleMessage completed");
       } catch (error) {
         // 다른 출처의 메시지는 무시
-        // console.debug("Ignored non-bridge message:", error);
       }
     };
 
     window.addEventListener("message", this.messageListener);
     this.isInitialized = true;
-    console.log("[MessageBridge] Initialized");
   }
 
   /**
@@ -154,4 +156,4 @@ class MessageBridge {
 }
 
 // 싱글톤 인스턴스
-export const messageBridge = new MessageBridge();
+export const webMessageHub = new WebMessageHub();
