@@ -16,7 +16,7 @@ export default function TabLayout() {
   // 인증 가드: 로그아웃되면 루트로 리다이렉트
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.replace("/");
+      router.replace("../index");
     }
   }, [isAuthenticated, isLoading, router]);
 
