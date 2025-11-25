@@ -6,6 +6,7 @@
  */
 
 import { create } from "zustand";
+import type { AuthTokenMessage } from "@sam-pyeong-oh/shared";
 
 interface AuthState {
   token: string | null;
@@ -15,12 +16,8 @@ interface AuthState {
 }
 
 interface AuthActions {
-  setAuth: (auth: {
-    token: string;
-    userId: string;
-    expiresAt: number;
-    provider: "google";
-  }) => void;
+  // Use the payload type directly from shared types
+  setAuth: (auth: AuthTokenMessage["payload"]) => void;
   clearAuth: () => void;
   isAuthenticated: () => boolean;
   isTokenExpired: () => boolean;
