@@ -82,16 +82,9 @@ export default function Index() {
   }
 
   // Show login screen if not authenticated
-  if (!isAuthenticated) {
+  if (!isLoading && !isAuthenticated) {
     return <LoginScreen onGoogleLogin={handleLogin} isLoading={loginInProgress} />;
   }
-
-  // Show loading while redirecting
-  return (
-    <View style={styles.loading}>
-      <ActivityIndicator size="large" color="#3b82f6" />
-    </View>
-  );
 }
 
 const styles = StyleSheet.create({
