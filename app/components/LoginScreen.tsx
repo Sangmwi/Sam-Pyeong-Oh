@@ -57,6 +57,7 @@ export function LoginScreen({ onGoogleLogin, isLoading = false }: LoginScreenPro
         <Text style={styles.footerText}>
           계속 진행하면 서비스 약관 및{"\n"}개인정보 처리방침에 동의하는 것으로 간주됩니다
         </Text>
+        <Text className="text-sm text-gray-500">Version 1.0.0</Text>
       </View>
     </View>
   );

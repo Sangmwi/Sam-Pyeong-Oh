@@ -1,5 +1,6 @@
 const path = require("path");
 const { getDefaultConfig } = require("expo/metro-config");
+const { withNativeWind } = require('nativewind/metro');
 
 const config = getDefaultConfig(__dirname);
 
@@ -20,4 +21,4 @@ config.resolver.extraNodeModules = {
   "@sam-pyeong-oh/shared": path.resolve(workspaceRoot, "shared"),
 };
 
-module.exports = config;
+module.exports = withNativeWind(config, { input: './app/global.css' })
