@@ -7,22 +7,11 @@
 import { makeRedirectUri } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
+import { Session } from "@supabase/supabase-js";
 import { supabase } from "@app/lib/supabase";
 
 export interface AuthResult {
-  session: {
-    access_token: string;
-    refresh_token: string;
-    expires_at?: number;
-    user: {
-      id: string;
-      email?: string;
-      user_metadata: {
-        name?: string;
-        avatar_url?: string;
-      };
-    };
-  };
+  session: Session;
 }
 
 export class SupabaseAuthService {
