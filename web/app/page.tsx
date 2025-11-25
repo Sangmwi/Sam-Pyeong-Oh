@@ -7,7 +7,6 @@ import { webMessageHub } from "@/lib/web-message-hub";
 
 export default function Home() {
   const { token } = useAuthStore();
-  const [logs, setLogs] = useState<string[]>([]);
 
   // 인증 관련 메시지 자동 처리
   useAuthMessage();
@@ -33,24 +32,6 @@ export default function Home() {
             <p className="mt-1 text-sm text-gray-600">Waiting for native OAuth...</p>
           </div>
         )}
-
-        {/* Debug Logs */}
-        <div className="rounded-lg border border-purple-300 bg-purple-50 p-4">
-          <p className="mb-2 font-mono text-xs font-semibold text-purple-800">
-            🐛 Debug Logs (최근 10개)
-          </p>
-          <div className="max-h-40 space-y-1 overflow-y-auto font-mono text-xs text-purple-700">
-            {logs.length === 0 ? (
-              <p>로그 없음...</p>
-            ) : (
-              logs.map((log, i) => (
-                <div key={i} className="truncate">
-                  {log}
-                </div>
-              ))
-            )}
-          </div>
-        </div>
 
         {/* Welcome Message */}
         {token && (

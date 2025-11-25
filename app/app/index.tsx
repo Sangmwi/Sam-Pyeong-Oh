@@ -54,7 +54,7 @@ export default function Index() {
     if (!isLoading && isAuthenticated) {
       const inTabs = segments[0] === "(tabs)";
       if (!inTabs) {
-        router.replace("/(tabs)" as any);
+        router.replace("/(tabs)");
       }
     }
   }, [isAuthenticated, isLoading, segments, router]);

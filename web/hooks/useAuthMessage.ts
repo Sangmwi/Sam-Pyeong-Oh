@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import {
   NativeToWebMessageType,
   createWebAppReadyMessage,
+  createSessionSyncCompleteMessage,
   type AuthErrorMessage,
   type AuthTokenMessage,
   type LogoutSuccessMessage,
@@ -31,8 +32,11 @@ export function useAuthMessage() {
     (message) => {
       const { token, userId, expiresAt, provider } = message.payload;
       setAuth({ token, userId, expiresAt, provider });
+
+      // Native에게 세션 동기화 완료 알림
+      sendMessage(createSessionSyncCompleteMessage());
     },
-    [setAuth]
+    [setAuth, sendMessage]
   );
 
   // LOGOUT_SUCCESS 메시지 처리

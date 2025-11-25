@@ -48,6 +48,7 @@ export enum WebToNativeMessageType {
   REQUEST_LOGOUT = "REQUEST_LOGOUT",
   TOKEN_REFRESH_REQUEST = "TOKEN_REFRESH_REQUEST",
   WEB_APP_READY = "WEB_APP_READY",
+  SESSION_SYNC_COMPLETE = "SESSION_SYNC_COMPLETE", // Added: Web acknowledges session sync
 }
 
 export interface RequestLoginMessage {
@@ -72,11 +73,17 @@ export interface WebAppReadyMessage {
   payload: Record<string, never>;
 }
 
+export interface SessionSyncCompleteMessage {
+  type: WebToNativeMessageType.SESSION_SYNC_COMPLETE;
+  payload: Record<string, never>;
+}
+
 export type WebToNativeMessage =
   | RequestLoginMessage
   | RequestLogoutMessage
   | TokenRefreshRequestMessage
-  | WebAppReadyMessage;
+  | WebAppReadyMessage
+  | SessionSyncCompleteMessage;
 
 // ============================================================================
 // Type Guards
@@ -141,6 +148,13 @@ export function createRequestLogoutMessage(): RequestLogoutMessage {
 export function createWebAppReadyMessage(): WebAppReadyMessage {
   return {
     type: WebToNativeMessageType.WEB_APP_READY,
+    payload: {},
+  };
+}
+
+export function createSessionSyncCompleteMessage(): SessionSyncCompleteMessage {
+  return {
+    type: WebToNativeMessageType.SESSION_SYNC_COMPLETE,
     payload: {},
   };
 }

@@ -7,7 +7,11 @@
 import { useCallback, useEffect, useState, type RefObject } from "react";
 import { Alert } from "react-native";
 import type { WebView } from "react-native-webview";
-import { createAuthTokenMessage, createLogoutSuccessMessage, WebToNativeMessageType } from "@sam-pyeong-oh/shared";
+import {
+  createAuthTokenMessage,
+  createLogoutSuccessMessage,
+  WebToNativeMessageType,
+} from "@sam-pyeong-oh/shared";
 import { SupabaseAuthService, type AuthResult } from "@app/services/auth/supabase-auth";
 import { supabase } from "@app/lib/supabase";
 import { nativeMessageHub } from "@app/lib/native-message-hub";
@@ -19,6 +23,7 @@ export interface AuthState {
   userId: string | null;
   email: string | null;
   accessToken: string | null;
+  isSessionSynced: boolean; // New: Web sync status
 }
 
 /**
@@ -31,6 +36,7 @@ export function useSupabaseAuth(webViewRef?: RefObject<WebView | null>) {
     userId: null,
     email: null,
     accessToken: null,
+    isSessionSynced: false,
   });
 
   // Send session helper
@@ -56,31 +62,43 @@ export function useSupabaseAuth(webViewRef?: RefObject<WebView | null>) {
       nativeMessageHub.initialize(webViewRef);
 
       // Handle WEB_APP_READY message
-      // 중복 등록 방지를 위해 cleanup 먼저 호출 (선택사항, nativeMessageHub 내부 로직에 따라 다름)
+      const readySubscription = nativeMessageHub.on(
+        WebToNativeMessageType.WEB_APP_READY,
+        async () => {
+          // 현재 세션 가져오기
+          const session = await SupabaseAuthService.getSession();
 
-      const cleanup = nativeMessageHub.on(WebToNativeMessageType.WEB_APP_READY, async () => {
-        // 현재 세션 가져오기
-        const session = await SupabaseAuthService.getSession();
-
-        if (session) {
-          // 작은 딜레이 후 메시지 전송 (WebView injection 준비 시간)
-          setTimeout(() => {
-            const message = createAuthTokenMessage(
-              session.access_token,
-              session.user.id,
-              session.expires_at || Date.now() + 3600 * 1000,
-              "google"
-            );
-            nativeMessageHub.sendMessageToRef(webViewRef || null, message);
-          }, 100);
+          if (session) {
+            // 작은 딜레이 후 메시지 전송 (WebView injection 준비 시간)
+            setTimeout(() => {
+              const message = createAuthTokenMessage(
+                session.access_token,
+                session.user.id,
+                session.expires_at || Date.now() + 3600 * 1000,
+                "google"
+              );
+              nativeMessageHub.sendMessageToRef(webViewRef || null, message);
+            }, 100);
+          }
         }
-      });
+      );
+
+      // Handle SESSION_SYNC_COMPLETE message
+      const syncSubscription = nativeMessageHub.on(
+        WebToNativeMessageType.SESSION_SYNC_COMPLETE,
+        () => {
+          setTimeout(() => {
+            setAuthState((prev) => ({ ...prev, isSessionSynced: true }));
+          }, 500); // UI Transition delay
+        }
+      );
 
       return () => {
-        cleanup();
+        readySubscription();
+        syncSubscription();
       };
     }
-  }, [webViewRef]); // 의존성 최소화
+  }, [webViewRef]);
 
   /**
    * Restore session on mount
@@ -91,16 +109,17 @@ export function useSupabaseAuth(webViewRef?: RefObject<WebView | null>) {
         const session = await SupabaseAuthService.getSession();
 
         if (session) {
-          setAuthState({
+          setAuthState((prev) => ({
+            ...prev,
             isAuthenticated: true,
             isLoading: false,
             userId: session.user.id,
             email: session.user.email || null,
             accessToken: session.access_token,
-          });
+            // Don't set synced yet, wait for WebView handshake
+          }));
 
           // Send to WebView
-          // 세션 객체를 그대로 전달 (AuthResult['session'] 형태에 맞춰 변환 필요 시 변환)
           sendSessionToWebView({
             access_token: session.access_token,
             refresh_token: session.refresh_token,
@@ -109,13 +128,15 @@ export function useSupabaseAuth(webViewRef?: RefObject<WebView | null>) {
               id: session.user.id,
               email: session.user.email,
               user_metadata: {
-                name: session.user.user_metadata.full_name || session.user.user_metadata.name,
+                name:
+                  session.user.user_metadata.full_name ||
+                  session.user.user_metadata.name,
                 avatar_url: session.user.user_metadata.avatar_url,
               },
             },
           });
         } else {
-          setAuthState((prev) => ({ ...prev, isLoading: false }));
+          setAuthState((prev) => ({ ...prev, isLoading: false, isSessionSynced: true })); // No session to sync
         }
       } catch (error) {
         console.error("[useSupabaseAuth] Session restore failed:", error);
@@ -130,40 +151,47 @@ export function useSupabaseAuth(webViewRef?: RefObject<WebView | null>) {
    * Listen to auth state changes
    */
   useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        setAuthState({
-          isAuthenticated: true,
-          isLoading: false,
-          userId: session.user.id,
-          email: session.user.email || null,
-          accessToken: session.access_token,
-        });
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (session) {
+          setAuthState((prev) => ({
+            ...prev,
+            isAuthenticated: true,
+            isLoading: false,
+            userId: session.user.id,
+            email: session.user.email || null,
+            accessToken: session.access_token,
+            isSessionSynced: false, // Reset sync on new session
+          }));
 
-        // Send to WebView
-        sendSessionToWebView({
-          access_token: session.access_token,
-          refresh_token: session.refresh_token,
-          expires_at: session.expires_at,
-          user: {
-            id: session.user.id,
-            email: session.user.email,
-            user_metadata: {
-              name: session.user.user_metadata.full_name || session.user.user_metadata.name,
-              avatar_url: session.user.user_metadata.avatar_url,
+          // Send to WebView
+          sendSessionToWebView({
+            access_token: session.access_token,
+            refresh_token: session.refresh_token,
+            expires_at: session.expires_at,
+            user: {
+              id: session.user.id,
+              email: session.user.email,
+              user_metadata: {
+                name:
+                  session.user.user_metadata.full_name ||
+                  session.user.user_metadata.name,
+                avatar_url: session.user.user_metadata.avatar_url,
+              },
             },
-          },
-        });
-      } else {
-        setAuthState({
-          isAuthenticated: false,
-          isLoading: false,
-          userId: null,
-          email: null,
-          accessToken: null,
-        });
+          });
+        } else {
+          setAuthState({
+            isAuthenticated: false,
+            isLoading: false,
+            userId: null,
+            email: null,
+            accessToken: null,
+            isSessionSynced: true, // No session needed
+          });
+        }
       }
-    });
+    );
 
     return () => {
       authListener.subscription.unsubscribe();
@@ -185,6 +213,7 @@ export function useSupabaseAuth(webViewRef?: RefObject<WebView | null>) {
         userId: result.session.user.id,
         email: result.session.user.email || null,
         accessToken: result.session.access_token,
+        isSessionSynced: false, // Start sync
       });
 
       Alert.alert("성공", "로그인에 성공했습니다!");
@@ -208,18 +237,17 @@ export function useSupabaseAuth(webViewRef?: RefObject<WebView | null>) {
 
       await SupabaseAuthService.signOut();
 
-      // Fallback: onAuthStateChange 리스너가 작동하지 않을 경우 대비
       setAuthState({
         isAuthenticated: false,
         isLoading: false,
         userId: null,
         email: null,
         accessToken: null,
+        isSessionSynced: true,
       });
 
       Alert.alert("성공", "로그아웃되었습니다.");
 
-      // Send to WebView
       if (webViewRef) {
         const message = createLogoutSuccessMessage();
         nativeMessageHub.sendMessageToRef(webViewRef, message);
