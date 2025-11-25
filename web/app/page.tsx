@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useAuthMessage } from "@/hooks/useAuthMessage";
 import { useAuthStore } from "@/store/auth";
-import { webMessageHub } from "@/lib/web-message-hub";
 
 export default function Home() {
   const { token } = useAuthStore();

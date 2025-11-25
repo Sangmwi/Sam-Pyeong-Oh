@@ -216,8 +216,6 @@ export function useSupabaseAuth(webViewRef?: RefObject<WebView | null>) {
         isSessionSynced: false, // Start sync
       });
 
-      Alert.alert("성공", "로그인에 성공했습니다!");
-
       // Send to WebView
       sendSessionToWebView(result.session);
     } catch (error) {
@@ -245,8 +243,6 @@ export function useSupabaseAuth(webViewRef?: RefObject<WebView | null>) {
         accessToken: null,
         isSessionSynced: true,
       });
-
-      Alert.alert("성공", "로그아웃되었습니다.");
 
       if (webViewRef) {
         const message = createLogoutSuccessMessage();
