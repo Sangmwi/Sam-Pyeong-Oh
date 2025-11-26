@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 
 /**
@@ -16,24 +15,10 @@ export default function AuthCallback() {
     // 잠시 대기 후 메인으로 이동 (인증 상태가 업데이트될 시간을 줌)
     const timer = setTimeout(() => {
       router.replace("/");
-    }, 100);
+    }, 0);
 
     return () => clearTimeout(timer);
   }, [router]);
 
-  return (
-    <View style={styles.container}>
-      <ActivityIndicator size="large" color="#3b82f6" />
-    </View>
-  );
+  return null;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "white",
-  },
-});
-

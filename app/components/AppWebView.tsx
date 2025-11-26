@@ -6,8 +6,8 @@
  * - 자동 인증 처리
  */
 
-import { useRef, useState, useEffect } from "react";
-import { StyleSheet, View, ActivityIndicator, Text } from "react-native";
+import { useRef, useState } from "react";
+import { View, ActivityIndicator, Text } from "react-native";
 import { WebView } from "react-native-webview";
 import { useSupabaseAuth } from "@app/hooks/useSupabaseAuth";
 import { WEBVIEW_INJECTED_JAVASCRIPT } from "@app/config/webview";
@@ -30,15 +30,12 @@ export function AppWebView({ path }: AppWebViewProps) {
   // 2. 로그인은 되어 있는데 세션 동기화가 아직 안 끝난 경우
   const showLoading = !isWebViewLoaded || (isAuthenticated && !isSessionSynced);
 
-  // 안전장치: 5초 뒤에도 동기화 안되면 로딩 해제 (Hook 내부에서 처리할 수도 있지만 UI 제어권은 여기 둠)
-  // 하지만 Hook 내부 로직이 견고해졌으므로 여기서는 순수 렌더링만 담당해도 됨
-
   return (
-    <View style={styles.container}>
+    <View className="flex-1">
       <WebView
         ref={webViewRef}
         source={{ uri: `${webUrl}${path}` }}
-        style={styles.webview}
+        className="flex-1"
         onMessage={handleWebViewMessage}
         injectedJavaScript={WEBVIEW_INJECTED_JAVASCRIPT}
         // 성능 최적화
@@ -65,9 +62,9 @@ export function AppWebView({ path }: AppWebViewProps) {
 
       {/* Loading Overlay */}
       {showLoading && (
-        <View style={styles.loadingOverlay}>
+        <View className="absolute inset-0 bg-[#FDFCF8] justify-center items-center z-10">
           <ActivityIndicator size="large" color="#78866B" />
-          <Text style={styles.loadingText}>
+          <Text className="mt-3 text-sm text-[#8A9385] font-medium">
             {isAuthenticated && !isSessionSynced ? "동기화 중..." : "로딩 중..."}
           </Text>
         </View>
@@ -75,25 +72,3 @@ export function AppWebView({ path }: AppWebViewProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  webview: {
-    flex: 1,
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "#FDFCF8", // Background Color (Khaki Theme Off-white)
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 10,
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: "#8A9385", // Text Sub Color
-    fontWeight: "500",
-  },
-});

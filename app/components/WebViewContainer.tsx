@@ -5,7 +5,7 @@
  */
 
 import React, { forwardRef, useCallback, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 import { WebView } from "react-native-webview";
 import type { WebViewProps } from "react-native-webview";
 import { getWebViewConfig } from "@app/config/webview";
@@ -90,11 +90,11 @@ export const WebViewContainer = forwardRef<WebView, WebViewContainerProps>(
     }, []);
 
     return (
-      <View style={styles.container}>
+      <View className="flex-1">
         <WebView
           ref={ref}
           source={{ uri: webUrl }}
-          style={styles.webView}
+          className="flex-1"
           onError={handleError}
           onHttpError={handleHttpError}
           onLoadStart={handleLoadStart}
@@ -108,12 +108,3 @@ export const WebViewContainer = forwardRef<WebView, WebViewContainerProps>(
 );
 
 WebViewContainer.displayName = "WebViewContainer";
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  webView: {
-    flex: 1,
-  },
-});

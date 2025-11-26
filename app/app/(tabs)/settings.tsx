@@ -8,7 +8,7 @@
  * - 캐시 관리
  */
 
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Alert } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useSupabaseAuth } from "@app/hooks/useSupabaseAuth";
@@ -26,11 +26,11 @@ export default function SettingsTab() {
         style: "destructive",
         onPress: async () => {
           try {
+            router.replace("/logout");
             await logout();
-            // 로그아웃 후 루트 화면으로 이동
-            router.replace("/");
           } catch (error) {
-            console.error("[Settings] Logout navigation failed:", error);
+            router.replace("/settings");
+            console.error("[Settings] Logout failed:", error);
           }
         },
       },
@@ -40,23 +40,23 @@ export default function SettingsTab() {
   const appVersion = Constants.expoConfig?.version || "1.0.0";
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView className="flex-1 bg-gray-50">
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>설정</Text>
-        <Text style={styles.headerSubtitle}>앱 설정 및 계정 관리</Text>
+      <View className="bg-white px-5 pt-16 pb-5 border-b border-gray-200">
+        <Text className="text-3xl font-bold text-gray-900">설정</Text>
+        <Text className="text-sm text-gray-500 mt-1">앱 설정 및 계정 관리</Text>
       </View>
 
       {/* Account Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>계정</Text>
+      <View className="mt-6 bg-white border-y border-gray-200">
+        <Text className="text-xs font-semibold text-gray-500 uppercase px-5 pt-4 pb-2">계정</Text>
 
         {email && (
-          <View style={styles.userInfo}>
+          <View className="flex-row items-center px-5 py-4 border-b border-gray-200">
             <Ionicons name="person-circle" size={48} color="#3b82f6" />
-            <View style={styles.userDetails}>
-              <Text style={styles.userName}>{email}</Text>
-              <Text style={styles.userProvider}>Google 계정</Text>
+            <View className="ml-3 flex-1">
+              <Text className="text-base font-semibold text-gray-900">{email}</Text>
+              <Text className="text-sm text-gray-500 mt-0.5">Google 계정</Text>
             </View>
           </View>
         )}
@@ -71,8 +71,8 @@ export default function SettingsTab() {
       </View>
 
       {/* App Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>앱 정보</Text>
+      <View className="mt-6 bg-white border-y border-gray-200">
+        <Text className="text-xs font-semibold text-gray-500 uppercase px-5 pt-4 pb-2">앱 정보</Text>
 
         <SettingItem icon="information-circle" title="버전" value={appVersion} />
 
@@ -90,8 +90,8 @@ export default function SettingsTab() {
       </View>
 
       {/* Legal Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>법적 고지</Text>
+      <View className="mt-6 bg-white border-y border-gray-200">
+        <Text className="text-xs font-semibold text-gray-500 uppercase px-5 pt-4 pb-2">법적 고지</Text>
 
         <SettingItem
           icon="document-text"
@@ -107,9 +107,9 @@ export default function SettingsTab() {
       </View>
 
       {/* Footer */}
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>Sam-Pyeong-Oh (삼평오)</Text>
-        <Text style={styles.footerSubtext}>AI Chat Application</Text>
+      <View className="items-center py-8">
+        <Text className="text-sm font-semibold text-gray-500">Sam-Pyeong-Oh (삼평오)</Text>
+        <Text className="text-xs text-gray-400 mt-1">AI Chat Application</Text>
       </View>
     </ScrollView>
   );
@@ -133,19 +133,19 @@ function SettingItem({
   showChevron = true,
 }: SettingItemProps) {
   const content = (
-    <View style={styles.settingItem}>
-      <View style={styles.settingLeft}>
+    <View className="flex-row items-center justify-between px-5 py-4">
+      <View className="flex-row items-center flex-1">
         <Ionicons
           name={icon}
           size={24}
           color={destructive ? "#ef4444" : "#6b7280"}
-          style={styles.settingIcon}
+          style={{ marginRight: 12 }}
         />
-        <Text style={[styles.settingTitle, destructive && styles.destructiveText]}>{title}</Text>
+        <Text className={`text-base ${destructive ? 'text-red-500' : 'text-gray-900'}`}>{title}</Text>
       </View>
 
-      <View style={styles.settingRight}>
-        {value && <Text style={styles.settingValue}>{value}</Text>}
+      <View className="flex-row items-center gap-2">
+        {value && <Text className="text-base text-gray-500">{value}</Text>}
         {onPress && showChevron && (
           <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
         )}
@@ -155,123 +155,11 @@ function SettingItem({
 
   if (onPress) {
     return (
-      <TouchableOpacity onPress={onPress} style={styles.settingButton}>
+      <TouchableOpacity onPress={onPress} className="border-b border-gray-200">
         {content}
       </TouchableOpacity>
     );
   }
 
-  return <View style={styles.settingButton}>{content}</View>;
+  return <View className="border-b border-gray-200">{content}</View>;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f9fafb",
-  },
-  header: {
-    backgroundColor: "white",
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-  },
-  headerTitle: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#111827",
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: "#6b7280",
-    marginTop: 4,
-  },
-  section: {
-    marginTop: 24,
-    backgroundColor: "white",
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: "#e5e7eb",
-  },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#6b7280",
-    textTransform: "uppercase",
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 8,
-  },
-  userInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-  },
-  userDetails: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  userName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#111827",
-  },
-  userProvider: {
-    fontSize: 14,
-    color: "#6b7280",
-    marginTop: 2,
-  },
-  settingButton: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-  },
-  settingItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-  },
-  settingLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
-  settingIcon: {
-    marginRight: 12,
-  },
-  settingTitle: {
-    fontSize: 16,
-    color: "#111827",
-  },
-  destructiveText: {
-    color: "#ef4444",
-  },
-  settingRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  settingValue: {
-    fontSize: 16,
-    color: "#6b7280",
-  },
-  footer: {
-    alignItems: "center",
-    paddingVertical: 32,
-  },
-  footerText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#6b7280",
-  },
-  footerSubtext: {
-    fontSize: 12,
-    color: "#9ca3af",
-    marginTop: 4,
-  },
-});

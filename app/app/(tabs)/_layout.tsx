@@ -4,22 +4,10 @@
  * 4개 탭: 홈(WebView), 채팅(WebView), 프로필(WebView), 설정(Native)
  */
 
-import { useEffect } from "react";
-import { Tabs, useRouter } from "expo-router";
+import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useSupabaseAuth } from "@app/hooks/useSupabaseAuth";
 
 export default function TabLayout() {
-  const router = useRouter();
-  const { isAuthenticated, isLoading } = useSupabaseAuth();
-
-  // 인증 가드: 로그아웃되면 루트로 리다이렉트
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace("../index");
-    }
-  }, [isAuthenticated, isLoading, router]);
-
   return (
     <Tabs
       screenOptions={{

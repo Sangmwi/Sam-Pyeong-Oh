@@ -9,7 +9,7 @@ import React, { useEffect, useState } from "react";
 import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
 import { useRouter, useSegments } from "expo-router";
-import { View, ActivityIndicator, StyleSheet } from "react-native";
+import { View, ActivityIndicator } from "react-native";
 import { useSupabaseAuth } from "@app/hooks/useSupabaseAuth";
 import { LoginScreen } from "@app/components/LoginScreen";
 
@@ -75,7 +75,7 @@ export default function Index() {
   // Show loading spinner while checking auth
   if (isLoading) {
     return (
-      <View style={styles.loading}>
+      <View className="flex-1 justify-center items-center bg-white">
         <ActivityIndicator size="large" color="#3b82f6" />
       </View>
     );
@@ -86,12 +86,3 @@ export default function Index() {
     return <LoginScreen onGoogleLogin={handleLogin} isLoading={loginInProgress} />;
   }
 }
-
-const styles = StyleSheet.create({
-  loading: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "white",
-  },
-});

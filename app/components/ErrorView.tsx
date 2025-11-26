@@ -5,7 +5,7 @@
  */
 
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { DEV_CHECKLIST_MESSAGE } from "@app/config/constants";
 import { getWebUrl, isLocalUrl } from "@app/utils/url";
 
@@ -45,88 +45,23 @@ export function ErrorView({ error, details, onRetry, showDevChecklist = true }: 
   const shouldShowDevChecklist = showDevChecklist && isLocalUrl(webUrl);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>웹뷰 연결 오류</Text>
+    <View className="flex-1 justify-center items-center bg-gray-100 p-5">
+      <Text className="text-2xl font-bold text-red-600 mb-4 text-center">웹뷰 연결 오류</Text>
 
-      <Text style={styles.error}>{error}</Text>
+      <Text className="text-base text-gray-800 mb-3 text-center leading-6">{error}</Text>
 
-      {details && <Text style={styles.details}>{details}</Text>}
+      {details && <Text className="text-sm text-gray-600 mb-3 text-center leading-5">{details}</Text>}
 
       {shouldShowDevChecklist && (
-        <View style={styles.checklistContainer}>
-          <Text style={styles.checklistTitle}>개발 환경 체크리스트</Text>
-          <Text style={styles.checklist}>{DEV_CHECKLIST_MESSAGE(webUrl)}</Text>
+        <View className="bg-white rounded-lg p-4 my-4 w-full max-w-[500px] border-l-4 border-orange-500">
+          <Text className="text-base font-semibold text-gray-800 mb-2">개발 환경 체크리스트</Text>
+          <Text className="text-sm text-gray-600 leading-5 font-mono">{DEV_CHECKLIST_MESSAGE(webUrl)}</Text>
         </View>
       )}
 
-      <TouchableOpacity style={styles.retryButton} onPress={onRetry}>
-        <Text style={styles.retryButtonText}>다시 시도</Text>
+      <TouchableOpacity className="bg-blue-500 py-3.5 px-8 rounded-lg mt-2" onPress={onRetry}>
+        <Text className="text-white text-base font-semibold">다시 시도</Text>
       </TouchableOpacity>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f5f5f5",
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#d32f2f",
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  error: {
-    fontSize: 16,
-    color: "#333",
-    marginBottom: 12,
-    textAlign: "center",
-    lineHeight: 24,
-  },
-  details: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 12,
-    textAlign: "center",
-    lineHeight: 20,
-  },
-  checklistContainer: {
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 16,
-    marginVertical: 16,
-    width: "100%",
-    maxWidth: 500,
-    borderLeftWidth: 4,
-    borderLeftColor: "#ff9800",
-  },
-  checklistTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 8,
-  },
-  checklist: {
-    fontSize: 13,
-    color: "#555",
-    lineHeight: 20,
-    fontFamily: "monospace",
-  },
-  retryButton: {
-    backgroundColor: "#4285F4",
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    borderRadius: 8,
-    marginTop: 8,
-  },
-  retryButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});
